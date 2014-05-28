@@ -78,6 +78,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Accel_ImagePanel.cpp" />
     <ClCompile Include="App.cpp" />
     <ClCompile Include="CL_Device.cpp" />
     <ClCompile Include="AccelerPaint.cpp" />
@@ -86,6 +87,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="CL_Device.h" />
     <ClInclude Include="AccelerPaint.h" />
+    <ClInclude Include="Accel_ImagePanel.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
