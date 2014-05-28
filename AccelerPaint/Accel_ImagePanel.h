@@ -17,12 +17,16 @@ public:
   void Refresh();
   void LoadFile(const wxString& name);
 private:
-
+  struct Layer
+  {
+    wxImage* Image;
+    bool Enabled;
+  };
   long draw_id;
   wxFrame* parent_;
   int id;
   wxImage Background;
-  std::vector<wxImage*> Layers;
+  std::vector<Layer> Layers;
   wxPanel* ImagePanel;
 };
 

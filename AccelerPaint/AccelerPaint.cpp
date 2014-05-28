@@ -23,6 +23,10 @@ AccelerPaint::AccelerPaint(wxWindow* parent,wxWindowID id)
   img = NULL;
   Create_GUI(parent,id);
   SetTitle("AccelerPaint");
+  
+#ifdef _WINDOWS
+  SetDoubleBuffered(true);
+#endif
 }
 
 void AccelerPaint::Create_GUI(wxWindow* parent, wxWindowID id)
