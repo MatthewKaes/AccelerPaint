@@ -2,11 +2,14 @@
 #include "wx\window.h"
 #include "wx\dcbuffer.h"
 
-Accel_ImagePanel::Accel_ImagePanel(wxWindow* parent)
+Accel_ImagePanel::Accel_ImagePanel(wxWindow* parent, wxScrollBar* hscroll, wxScrollBar* vscroll)
 {
   ImagePanel = NULL;
 
-  Create(parent, 0, 0,  parent->GetSize().GetX(), parent->GetSize().GetY());
+  hscroll_ = hscroll;
+  vscroll_ = vscroll;
+
+  Create(parent, 0, 0,  parent->GetSize().GetX() - 18, parent->GetSize().GetY() - 18);
 }
 void Accel_ImagePanel::Create(wxWindow* parent, int x, int y, int width, int height)
 {
@@ -38,16 +41,61 @@ void Accel_ImagePanel::Update(wxPaintEvent& event)
 {
   if(ImagePanel)
   {
-    ImagePanel->SetSize(img_width, img_height);
-    ImagePanel->SetPosition(wxPoint((parent_->GetSize().GetWidth() - img_width) / 2, (parent_->GetSize().GetHeight() - img_height - 64) / 2));
+    int rend_width, rend_height;
+    int x_off, y_off;
+
+    //Update scroll width
+    if(img_width < parent_->GetSize().GetWidth() - 18)
+    {
+      rend_width = img_width;
+      hscroll_->Enable(false);
+      x_off = 0;
+    }
+    else
+    {
+      rend_width = parent_->GetSize().GetWidth() - 18;
+      if(!hscroll_->IsEnabled())
+      {
+        hscroll_->SetThumbPosition(0);
+        hscroll_->Enable(true);
+      }
+      if(hscroll_->GetRange() != img_width - rend_width + 10)
+        hscroll_->SetScrollbar(hscroll_->GetThumbPosition(), hscroll_->GetThumbSize(), (img_width - rend_width + 10), 10);
+      x_off = hscroll_->GetThumbPosition();
+    }
+
+    //Update scroll height
+    if(img_height < parent_->GetSize().GetHeight() - 18)
+    {
+      rend_height = img_height;
+      vscroll_->Enable(false);
+      y_off = 0;
+    }
+    else
+    {
+      rend_height = parent_->GetSize().GetHeight() - 18;
+      if(!vscroll_->IsEnabled())
+      {
+        vscroll_->SetThumbPosition(0);
+        vscroll_->Enable(true);
+      }
+      if(vscroll_->GetRange() != img_height - rend_height + 10)
+        vscroll_->SetScrollbar(vscroll_->GetThumbPosition(), vscroll_->GetThumbSize(), img_height - rend_height + 10, 10);
+      y_off = vscroll_->GetThumbPosition();
+    }
+
+    //Make the image the right size and position
+    ImagePanel->SetSize(rend_width, rend_height);
+    ImagePanel->SetPosition(wxPoint((parent_->GetSize().GetWidth() - rend_width - 18) / 2, (parent_->GetSize().GetHeight() - rend_height - 18) / 2));
 	  
+    //Render the image
     wxBufferedPaintDC dc(ImagePanel);
     for(int y = 0; y < ImagePanel->GetSize().GetHeight(); y += 128)
       for(int x = 0; x < ImagePanel->GetSize().GetWidth(); x += 128)
         dc.DrawBitmap(Background,x,y, true);
     for(unsigned layer = 0; layer < Layers.size(); layer++)
       if(Layers[layer].Enabled)
-        dc.DrawBitmap(*Layers[layer].Image, 0, 0, true);
+        dc.DrawBitmap(*Layers[layer].Image, -x_off, -y_off, true);
   }
 }
 void Accel_ImagePanel::LoadFile(const wxString& name, bool new_layer)
@@ -83,13 +131,25 @@ void Accel_ImagePanel::LoadFile(const wxString& name, bool new_layer)
     img_height = ImagePtr->GetHeight();// + BORDER_SIZE;
 
     ImagePanel->SetSize(img_width, img_height);
-    ImagePanel->SetPosition(wxPoint((parent_->GetSize().GetWidth() - img_width) / 2, 
-                            (parent_->GetSize().GetHeight() - img_height) / 2));
+    ImagePanel->SetPosition(wxPoint((parent_->GetSize().GetWidth() - img_width - 18) / 2, 
+                            (parent_->GetSize().GetHeight() - img_height - 18) / 2));
   }
 }
 void Accel_ImagePanel::CheckVisability(int index, bool state)
 {
   Layers[index].Enabled = state;
+}
+wxBitmap Accel_ImagePanel::Render()
+{
+  wxMemoryDC dc;
+  wxBitmap output(img_width, img_height, dc);
+  dc.SelectObject(output);
+
+  for(unsigned layer = 0; layer < Layers.size(); layer++)
+    if(Layers[layer].Enabled)
+      dc.DrawBitmap(*Layers[layer].Image, 0, 0, true);
+
+  return output;
 }
 
 unsigned Accel_ImagePanel::LayerCount()

@@ -32,12 +32,16 @@ class AccelerPaint : public wxFrame
     void ResizeWindow(wxSizeEvent& event);
     void OpenFile(wxCommandEvent& event);
     void OpenLayer(wxCommandEvent& event);
+    void SaveRender(wxCommandEvent& event);
     void LayerChecked(wxCommandEvent& event);
     void ImageBackground(wxPaintEvent& event);
+    void ImageScroll(wxScrollEvent& event);
     
     wxPanel* layerframe;
     wxPanel* toolspanel;
     wxPanel* imagepanel;
+    wxScrollBar* imagesizeh;
+    wxScrollBar* imagesizev;
     wxMenuBar* menustrip;
     wxMenu* filemenu;
     wxCheckListBox* layersinfo;
@@ -48,7 +52,10 @@ class AccelerPaint : public wxFrame
     
     static const long ID_OpenItem;
     static const long ID_OpenLItem;
+    static const long ID_SaveItem;
     static const long ID_Layer;
+    static const long ID_HScroll;
+    static const long ID_VScroll;
 
     DECLARE_EVENT_TABLE()
 };
