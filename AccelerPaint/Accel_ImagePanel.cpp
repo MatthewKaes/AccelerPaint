@@ -2,28 +2,23 @@
 #include "wx\window.h"
 #include "wx\dcbuffer.h"
 
-Accel_ImagePanel::Accel_ImagePanel(wxFrame* parent)
+Accel_ImagePanel::Accel_ImagePanel(wxWindow* parent)
 {
   ImagePanel = NULL;
 
   Create(parent, 0, 0,  parent->GetSize().GetX(), parent->GetSize().GetY());
-  //SetTitle("Image1");
-
-  //Prevent Draw Flickering
-#ifdef _WINDOWS
-  SetBackgroundStyle(wxBG_STYLE_PAINT);
-  SetDoubleBuffered(true);
-#endif
 }
-void Accel_ImagePanel::Create(wxFrame* parent, int x, int y, int width, int height)
+void Accel_ImagePanel::Create(wxWindow* parent, int x, int y, int width, int height)
 {
   parent_ = parent;
   id = wxNewId();
   draw_id = wxNewId();
   Background.LoadFile("./resources/Background.png");
   SetSize(width, height);
-  ImagePanel = new wxPanel(parent, id, wxPoint(x, y), wxSize(width, height), wxFULL_REPAINT_ON_RESIZE|wxRAISED_BORDER|wxTAB_TRAVERSAL, _T("ID_ImagePanel"));
+  ImagePanel = new wxPanel(parent, id, wxPoint(x, y), wxSize(width, height), wxFULL_REPAINT_ON_RESIZE|wxTAB_TRAVERSAL, _T("ID_ImagePanel"));
   ImagePanel->Connect(wxEVT_PAINT,(wxObjectEventFunction)&Accel_ImagePanel::Update, 0, this);
+  ImagePanel->SetDoubleBuffered(true);
+  ImagePanel->SetBackgroundStyle(wxBG_STYLE_PAINT);
 }
 void Accel_ImagePanel::Remove()
 {
@@ -84,11 +79,20 @@ void Accel_ImagePanel::LoadFile(const wxString& name, bool new_layer)
   {
     wxImage* ImagePtr = Layers[0].Image;
 
-    img_width = ImagePtr->GetWidth() + BORDER_SIZE;
-    img_height = ImagePtr->GetHeight() + BORDER_SIZE;
+    img_width = ImagePtr->GetWidth();// + BORDER_SIZE;
+    img_height = ImagePtr->GetHeight();// + BORDER_SIZE;
 
     ImagePanel->SetSize(img_width, img_height);
     ImagePanel->SetPosition(wxPoint((parent_->GetSize().GetWidth() - img_width) / 2, 
-                            (parent_->GetSize().GetHeight() - img_height - 64) / 2));
+                            (parent_->GetSize().GetHeight() - img_height) / 2));
   }
+}
+void Accel_ImagePanel::CheckVisability(int index, bool state)
+{
+  Layers[index].Enabled = state;
+}
+
+unsigned Accel_ImagePanel::LayerCount()
+{
+  return Layers.size();
 }
