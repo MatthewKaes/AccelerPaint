@@ -1,19 +1,18 @@
 #include "App.h"
-#include "AccelerPaint.h"
 
 #include <wx/image.h>
 
-IMPLEMENT_APP(MyApp);
+IMPLEMENT_APP(App);
 
-bool MyApp::OnInit()
+bool App::OnInit()
 {
   bool wxsOK = true;
   wxInitAllImageHandlers();
   if( wxsOK )
   {
-    	AccelerPaint* Frame = new AccelerPaint(0);
-    	Frame->Show();
-    	SetTopWindow(Frame);
+    Frame = new AccelerPaint(0);
+    Frame->Show();
+    SetTopWindow(Frame);
   }
   return wxsOK;
 }

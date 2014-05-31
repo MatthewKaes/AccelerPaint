@@ -43,9 +43,8 @@ void Accel_ImagePanel::Update(wxPaintEvent& event)
 {
   if(ImagePanel)
   {
-    wxImage* ImagePtr = Layers[0].Image;
-    ImagePanel->SetSize(ImagePtr->GetWidth() + BORDER_SIZE, ImagePtr->GetHeight() + BORDER_SIZE);
-    ImagePanel->SetPosition(wxPoint((parent_->GetSize().GetWidth() - ImagePtr->GetWidth()) / 2, (parent_->GetSize().GetHeight() - ImagePtr->GetHeight() - 64) / 2));
+    ImagePanel->SetSize(img_width, img_height);
+    ImagePanel->SetPosition(wxPoint((parent_->GetSize().GetWidth() - img_width) / 2, (parent_->GetSize().GetHeight() - img_height - 64) / 2));
 	  
     wxBufferedPaintDC dc(ImagePanel);
     for(int y = 0; y < ImagePanel->GetSize().GetHeight(); y += 128)
@@ -56,9 +55,13 @@ void Accel_ImagePanel::Update(wxPaintEvent& event)
         dc.DrawBitmap(*Layers[layer].Image, 0, 0, true);
   }
 }
-void Accel_ImagePanel::LoadFile(const wxString& name)
+void Accel_ImagePanel::LoadFile(const wxString& name, bool new_layer)
 {  
-  if(Layers.size() > 0)
+  //Update Fix:
+  //quites iCCP warning for PNG files. Temporary fix that quites ALL warnings.
+  wxLogNull Nolog;
+
+  if(Layers.size() > 0 && !new_layer)
   {
     for(unsigned layer = 1; layer < Layers.size(); layer++)
     {
@@ -74,9 +77,18 @@ void Accel_ImagePanel::LoadFile(const wxString& name)
     new_lay.Enabled = true;
     Layers.push_back(new_lay);
   }
-  Layers[0].Enabled = true;
-  Layers[0].Image->LoadFile(name);
-  wxImage* ImagePtr = Layers[0].Image;
-  ImagePanel->SetSize(ImagePtr->GetWidth() + BORDER_SIZE, ImagePtr->GetHeight() + BORDER_SIZE);
-  ImagePanel->SetPosition(wxPoint((parent_->GetSize().GetWidth() - ImagePtr->GetWidth()) / 2, (parent_->GetSize().GetHeight() - ImagePtr->GetHeight() - 64) / 2));
+  Layers[Layers.size() - 1].Enabled = true;
+  Layers[Layers.size() - 1].Image->LoadFile(name);
+
+  if(!new_layer)
+  {
+    wxImage* ImagePtr = Layers[0].Image;
+
+    img_width = ImagePtr->GetWidth() + BORDER_SIZE;
+    img_height = ImagePtr->GetHeight() + BORDER_SIZE;
+
+    ImagePanel->SetSize(img_width, img_height);
+    ImagePanel->SetPosition(wxPoint((parent_->GetSize().GetWidth() - img_width) / 2, 
+                            (parent_->GetSize().GetHeight() - img_height - 64) / 2));
+  }
 }

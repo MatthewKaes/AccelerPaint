@@ -19,21 +19,22 @@ class AccelerPaint : public wxFrame
 {
   public:
     AccelerPaint(wxWindow* parent,wxWindowID id = -1);
-    virtual ~AccelerPaint() {};
+    virtual ~AccelerPaint() {if(img) delete img;};
 
   private:
     void Create_GUI(wxWindow* parent, wxWindowID id);
     void OpenFile(wxCommandEvent& event);
+    void OpenLayer(wxCommandEvent& event);
 
     wxMenuBar* menustrip;
     wxMenu* filemenu;
-    wxMenuItem* openitem;
 
     Accel_ImagePanel* img;
     OpenCL_Dev device;
 
     
     static const long ID_OpenItem;
+    static const long ID_OpenLItem;
 
     DECLARE_EVENT_TABLE()
 };

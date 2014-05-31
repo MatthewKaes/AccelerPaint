@@ -4,7 +4,7 @@
 #include "wx\wx.h"
 #include <vector>
 
-#define BORDER_SIZE 14
+#define BORDER_SIZE 6
 
 class Accel_ImagePanel : public wxFrame {
 public:
@@ -15,7 +15,7 @@ public:
   void Update(wxPaintEvent& event);
   void Remove();
   void Refresh();
-  void LoadFile(const wxString& name);
+  void LoadFile(const wxString& name, bool new_layer = false);
 private:
   struct Layer
   {
@@ -23,6 +23,7 @@ private:
     bool Enabled;
   };
   long draw_id;
+  int img_width, img_height;
   wxFrame* parent_;
   int id;
   wxImage Background;

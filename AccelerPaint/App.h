@@ -1,11 +1,15 @@
 #ifndef MYAPP_FRAMEWORK_H
 #define MYAPP_FRAMEWORK_H
 #include <wx/app.h>
+#include "AccelerPaint.h"
 
-class MyApp : public wxApp
+class App : public wxApp
 {
-    public:
-        virtual bool OnInit();
+  public:
+    virtual bool OnInit();
+
+  private:
+    AccelerPaint* Frame;
 };
 
 #endif
