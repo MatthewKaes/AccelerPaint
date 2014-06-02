@@ -27,7 +27,7 @@ END_EVENT_TABLE()
 AccelerPaint::AccelerPaint(wxWindow* parent,wxWindowID id)
 {
   //Build the GUI
-  img = NULL;
+  opencl_img = NULL;
   Create_GUI(parent,id);
   SetTitle("AccelerPaint");
   
@@ -39,20 +39,28 @@ AccelerPaint::AccelerPaint(wxWindow* parent,wxWindowID id)
 
 void AccelerPaint::Create_GUI(wxWindow* parent, wxWindowID id)
 {
-  //Components
-  wxMenuItem* menu_items;
-
   //Set up the Main application window
   wxPoint Selection_Point(15,0);
-  unsigned Selection_Width = 210;
-  unsigned Selection_Height = 26;
-  unsigned Spacing = Selection_Height + 8;
 
   Create(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE|wxNO_BORDER, _T("wxID_ANY"));
   
-  wxSize minimum_size(370 * 2 + 18 + Selection_Width + Selection_Point.x * 2, 370 * 2 + 70);
+  wxSize minimum_size(Program_Min_Width, Program_Min_Height);
   SetMinSize(minimum_size);
   SetSize(minimum_size);
+
+  //Create subwindows
+  Create_GUI_MenuStrip(parent, id);
+  Create_GUI_Tools(parent, id);
+  Create_GUI_Layers(parent, id);
+  Create_GUI_ImagePanel(parent, id);
+
+  //Connect Window Events
+  Connect(wxEVT_SIZE, (wxObjectEventFunction)&AccelerPaint::ResizeWindow);
+}
+void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
+{
+  //Components
+  wxMenuItem* menu_items;
 
   //Construct File Menu
   menustrip = new wxMenuBar();
@@ -64,49 +72,56 @@ void AccelerPaint::Create_GUI(wxWindow* parent, wxWindowID id)
   menu_items = new wxMenuItem(filemenu, ID_SaveItem, _("Save"), wxEmptyString, wxITEM_NORMAL);
   filemenu->Append(menu_items);
   menustrip->Append(filemenu, _("File"));
-
-  //Construct SideFrame
-  toolspanel = new wxPanel(this, wxNewId(), wxPoint(0,0), wxSize(TOOLFRAME_WIDTH,TOOLFRAME_HEIGHT), wxRAISED_BORDER);
-
-  //Construct Layers
-  layerframe = new wxPanel(this, wxNewId(), wxPoint(0,0), wxSize(LAYERFRAME_WIDTH + 7,LAYERFRAME_HEIGHT + 7), wxRAISED_BORDER);
-  layersinfo = new wxCheckListBox(layerframe, ID_Layer);
-  layersinfo->SetSize(LAYERFRAME_WIDTH,LAYERFRAME_HEIGHT);
   
   //Set the Menu bar
   SetMenuBar(menustrip);
 
-  //Create The actual work area
-  imagepanel = new wxPanel(this, wxNewId(), wxPoint(toolspanel->GetSize().GetWidth(),0), 
-                           wxSize(LAYERFRAME_WIDTH + 7,LAYERFRAME_HEIGHT + 7));
-  imagepanel->SetSize(this->GetSize().GetWidth() - LAYERFRAME_WIDTH - 7 - TOOLFRAME_WIDTH, 
-               this->GetSize().GetHeight() - LAYERFRAME_HEIGHT - 7 - TOOLFRAME_HEIGHT);
-  imagepanel->SetBackgroundStyle(wxBG_STYLE_PAINT);
-
-  imagesizeh = new wxScrollBar(imagepanel, ID_HScroll, wxPoint(0, 0), wxSize(imagepanel->GetSize().GetWidth(), 18));
-  imagesizeh->SetScrollbar(250, 10, 500, 0);
-  imagesizeh->Enable(false);
-
-  imagesizev = new wxScrollBar(imagepanel, ID_VScroll, wxPoint(0, 0), wxSize(18, imagepanel->GetSize().GetHeight()), wxVERTICAL);
-  imagesizev->SetScrollbar(250, 10, 500, 0);
-  imagesizev->Enable(false);
-
-  img = new Accel_ImagePanel(imagepanel, imagesizeh, imagesizev);
-
-
-  //Connect Events for the program
+  //Connect Events for Menustrip
   Connect(ID_OpenItem, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::OpenFile);
   Connect(ID_OpenLItem, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::OpenLayer);
   Connect(ID_SaveItem, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::SaveRender);
+}
+void AccelerPaint::Create_GUI_Tools(wxWindow* parent, wxWindowID id)
+{
+  //Construct SideFrame
+  toolspanel = new wxPanel(this, wxNewId(), wxPoint(0,0), wxSize(TOOLFRAME_WIDTH,TOOLFRAME_HEIGHT), wxRAISED_BORDER);
+}
+void AccelerPaint::Create_GUI_Layers(wxWindow* parent, wxWindowID id)
+{
+  //Construct Layers
+  layerframe = new wxPanel(this, wxNewId(), wxPoint(0,0), wxSize(LAYERFRAME_WIDTH + 7,LAYERFRAME_HEIGHT + 7), wxRAISED_BORDER);
+  layersinfo = new wxCheckListBox(layerframe, ID_Layer);
+  layersinfo->SetSize(LAYERFRAME_WIDTH,LAYERFRAME_HEIGHT);
+
+  //Connect Events for the layer checking
   Connect(ID_Layer, wxEVT_CHECKLISTBOX,(wxObjectEventFunction)&AccelerPaint::LayerChecked);
+
+}
+void AccelerPaint::Create_GUI_ImagePanel(wxWindow* parent, wxWindowID id)
+{
+  //Create The actual work area
+  imagepanel = new wxPanel(this, wxNewId(), wxPoint(toolspanel->GetSize().GetWidth(),0), 
+                           wxSize(LAYERFRAME_WIDTH + 7,LAYERFRAME_HEIGHT + SCROLL_BORDER_SIZE));
+  imagepanel->SetSize(this->GetSize().GetWidth() - LAYERFRAME_WIDTH - SCROLL_BORDER_SIZE - TOOLFRAME_WIDTH, 
+               this->GetSize().GetHeight() - LAYERFRAME_HEIGHT - SCROLL_BORDER_SIZE - TOOLFRAME_HEIGHT);
+  imagepanel->SetBackgroundStyle(wxBG_STYLE_PAINT);
+
+  //Scroll bars for image
+  imagesizeh = new wxScrollBar(imagepanel, ID_HScroll, wxPoint(0, 0), wxSize(imagepanel->GetSize().GetWidth(), 18));
+  imagesizeh->Enable(false);
+
+  imagesizev = new wxScrollBar(imagepanel, ID_VScroll, wxPoint(0, 0), wxSize(18, imagepanel->GetSize().GetHeight()), wxVERTICAL);
+  imagesizev->Enable(false);
+
+  //Create the new ImagePanel to handel OpenCL drawing
+  //This is the component that does all the work.
+  opencl_img = new Accel_ImagePanel(imagepanel, imagesizeh, imagesizev);
 
   //Connect part events  
   imagepanel->Connect(wxEVT_PAINT,(wxObjectEventFunction)&AccelerPaint::ImageBackground);
   Connect(ID_HScroll, wxEVT_SCROLL_CHANGED,(wxObjectEventFunction)&AccelerPaint::ImageScroll);
   Connect(ID_VScroll, wxEVT_SCROLL_CHANGED,(wxObjectEventFunction)&AccelerPaint::ImageScroll);
 
-  //Connect Window Events
-  Connect(wxEVT_SIZE, (wxObjectEventFunction)&AccelerPaint::ResizeWindow);
 }
 void AccelerPaint::ResizeWindow(wxSizeEvent& event)
 {
@@ -114,20 +129,21 @@ void AccelerPaint::ResizeWindow(wxSizeEvent& event)
   layerframe->SetPosition(wxPoint(GetSize().GetWidth() - LAYERFRAME_WIDTH - 21, GetSize().GetHeight() - LAYERFRAME_HEIGHT - 64));
   imagepanel->SetSize(this->GetSize().GetWidth() - LAYERFRAME_WIDTH - 21 - TOOLFRAME_WIDTH, this->GetSize().GetHeight() - 58);
   
-  imagesizev->SetPosition(wxPoint(imagepanel->GetSize().GetWidth() - 18, 0));
-  imagesizev->SetSize(18 , imagepanel->GetSize().GetHeight() - 18);
+  imagesizev->SetPosition(wxPoint(imagepanel->GetSize().GetWidth() - SCROLL_SIZE_WIDTH, 0));
+  imagesizev->SetSize(SCROLL_SIZE_WIDTH, imagepanel->GetSize().GetHeight() - SCROLL_SIZE_WIDTH);
 
-  imagesizeh->SetPosition(wxPoint(0, imagepanel->GetSize().GetHeight() - 18));
-  imagesizeh->SetSize(imagepanel->GetSize().GetWidth() - 18, 18);
+  imagesizeh->SetPosition(wxPoint(0, imagepanel->GetSize().GetHeight() - SCROLL_SIZE_WIDTH));
+  imagesizeh->SetSize(imagepanel->GetSize().GetWidth() - SCROLL_SIZE_WIDTH, SCROLL_SIZE_WIDTH);
 }
 void AccelerPaint::OpenFile(wxCommandEvent& event)
 {
+  //Simply call load dialog
   wxFileDialog  dlg( this, _T("Select a supported Image file"), wxEmptyString, wxEmptyString, _T("PNG files (*.png)|*.png|JPG files (*.jpg)|*.jpg|BMP files (*.bmp)|*.bmp|GIF files (*.gif)|*.gif"), wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 
 	if( dlg.ShowModal() == wxID_OK )
 	{
-    img->LoadFile(dlg.GetPath());
-    img->Refresh();
+    opencl_img->LoadFile(dlg.GetPath());
+    opencl_img->Refresh();
 
     layersinfo->Clear();
     layersinfo->Insert(dlg.GetFilename(), 0);
@@ -137,16 +153,17 @@ void AccelerPaint::OpenFile(wxCommandEvent& event)
 void AccelerPaint::OpenLayer(wxCommandEvent& event)
 {
   //Return if an image isn't loaded yet
-  if(img->LayerCount() == 0)
+  if(opencl_img->LayerCount() == 0)
   {
     return;
   }
+  //Simply call load dialog
   wxFileDialog  dlg( this, _T("Select a supported Image file"), wxEmptyString, wxEmptyString, _T("PNG files (*.png)|*.png|JPG files (*.jpg)|*.jpg|BMP files (*.bmp)|*.bmp|GIF files (*.gif)|*.gif"), wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 
 	if( dlg.ShowModal() == wxID_OK )
 	{
-    img->LoadFile(dlg.GetPath(), true);
-    img->Refresh();
+    opencl_img->LoadFile(dlg.GetPath(), true);
+    opencl_img->Refresh();
     
     layersinfo->Insert(dlg.GetFilename(), layersinfo->GetCount());
     layersinfo->Check(layersinfo->GetCount() - 1);
@@ -155,32 +172,35 @@ void AccelerPaint::OpenLayer(wxCommandEvent& event)
 void AccelerPaint::SaveRender(wxCommandEvent& event)
 {
   //Return if an image isn't loaded yet
-  if(img->LayerCount() == 0)
+  if(opencl_img->LayerCount() == 0)
   {
     return;
   }
+  //Simply call save dialog
   wxFileDialog  dlg( this, _T("Save As..."), wxEmptyString, wxEmptyString, _T("PNG files (*.png)|*.png|JPG files (*.jpg)|*.jpg|BMP files (*.bmp)|*.bmp"), wxFD_SAVE);
 
 	if( dlg.ShowModal() == wxID_OK )
 	{
-    wxImage render(img->Render().ConvertToImage());
+    wxImage render(opencl_img->Render().ConvertToImage());
     render.SaveFile(dlg.GetPath());
   }
 }
 void AccelerPaint::LayerChecked(wxCommandEvent& event)
 {
-  img->CheckVisability(event.GetInt(), layersinfo->IsChecked(event.GetInt()));
-  img->Refresh();
+  opencl_img->CheckVisability(event.GetInt(), layersinfo->IsChecked(event.GetInt()));
+  opencl_img->Refresh();
 }
 void AccelerPaint::ImageBackground(wxPaintEvent& event)
 {
   wxBufferedPaintDC dc(this);
 
   // draw a rectangle
-  dc.SetBrush(wxBrush(wxColour(100,100,100))); // blue filling
+  dc.SetBrush(wxBrush(BACKGROUND_COLOR));
+
+  //Increase the rectangle size by 2 and recenter
   dc.DrawRectangle( -1, -1, this->GetSize().GetWidth() + 2, this->GetSize().GetHeight() + 2);
 }
 void AccelerPaint::ImageScroll(wxScrollEvent& event)
 {
-  img->Refresh();
+  opencl_img->Refresh();
 }

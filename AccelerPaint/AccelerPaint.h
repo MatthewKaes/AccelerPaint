@@ -20,15 +20,26 @@
 #define TOOLFRAME_HEIGHT 400
 #define LAYERFRAME_WIDTH 220
 #define LAYERFRAME_HEIGHT 330
+#define SCROLL_BORDER_SIZE 7
+#define SCROLL_SIZE_WIDTH 18
+
+#define BACKGROUND_COLOR wxColour(100,100,100)
 
 class AccelerPaint : public wxFrame
 {
   public:
     AccelerPaint(wxWindow* parent,wxWindowID id = -1);
-    virtual ~AccelerPaint() {if(img){img->Remove(); delete img;}};
+    virtual ~AccelerPaint() {if(opencl_img){opencl_img->Remove(); delete opencl_img;}};
+
+    static const unsigned Program_Min_Width = 800;
+    static const unsigned Program_Min_Height = 650;
 
   private:
     void Create_GUI(wxWindow* parent, wxWindowID id);
+    void Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id);
+    void Create_GUI_Tools(wxWindow* parent, wxWindowID id);
+    void Create_GUI_Layers(wxWindow* parent, wxWindowID id);
+    void Create_GUI_ImagePanel(wxWindow* parent, wxWindowID id);
     void ResizeWindow(wxSizeEvent& event);
     void OpenFile(wxCommandEvent& event);
     void OpenLayer(wxCommandEvent& event);
@@ -46,7 +57,7 @@ class AccelerPaint : public wxFrame
     wxMenu* filemenu;
     wxCheckListBox* layersinfo;
 
-    Accel_ImagePanel* img;
+    Accel_ImagePanel* opencl_img;
     OpenCL_Dev device;
 
     
@@ -56,6 +67,8 @@ class AccelerPaint : public wxFrame
     static const long ID_Layer;
     static const long ID_HScroll;
     static const long ID_VScroll;
+
+    
 
     DECLARE_EVENT_TABLE()
 };

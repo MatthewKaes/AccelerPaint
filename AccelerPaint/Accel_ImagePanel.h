@@ -4,8 +4,6 @@
 #include "wx\wx.h"
 #include <vector>
 
-//#define BORDER_SIZE 6
-
 class Accel_ImagePanel : public wxFrame {
 public:
   Accel_ImagePanel(wxWindow* parent, wxScrollBar* hscroll, wxScrollBar* vscroll);
