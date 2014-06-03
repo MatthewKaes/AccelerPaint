@@ -9,6 +9,8 @@ Current Interface
 Example .JPEG Rendering
 ![Current Setup](img/render.jpg?raw=true)
 
+Current output rendering uses wxWidgets to blend the images together currently. This leads to mixed results with alpha channels that are only slightly transparent. The OpenCL Alpha Blending Kernel is being written first to handel the issue but there isn't a better working solution just yet for computers where OpenCL is not supported.
+
 
 Multiplatform
 =============
