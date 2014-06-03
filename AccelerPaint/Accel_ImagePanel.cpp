@@ -156,3 +156,7 @@ unsigned Accel_ImagePanel::LayerCount()
 {
   return Layers.size();
 }
+std::vector<Layer>& Accel_ImagePanel::GetLayers()
+{
+  return Layers;
+}

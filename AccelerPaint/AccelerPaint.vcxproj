@@ -49,7 +49,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CL_LOG_ERRORS=stdout;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(OPENCL)\include\;$(WXWIN)/lib/vc_lib/mswd;$(WXWIN)/include/msvc;$(WXWIN)/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -88,6 +88,9 @@
     <ClInclude Include="CL_Device.h" />
     <ClInclude Include="AccelerPaint.h" />
     <ClInclude Include="Accel_ImagePanel.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\Fill_Shader.cl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -31,10 +31,18 @@ AccelerPaint::AccelerPaint(wxWindow* parent,wxWindowID id)
   Create_GUI(parent,id);
   SetTitle("AccelerPaint");
   
+  //Build opencl
+  Build_Opencl();
+
   //Help prevent flickering on windows.
 #ifdef _WINDOWS
   SetDoubleBuffered(true);
 #endif
+}
+
+void AccelerPaint::Build_Opencl()
+{
+  device.Build_Kernel("Fill_Shader");
 }
 
 void AccelerPaint::Create_GUI(wxWindow* parent, wxWindowID id)

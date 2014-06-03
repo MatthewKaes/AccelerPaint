@@ -35,6 +35,7 @@ class AccelerPaint : public wxFrame
     static const unsigned Program_Min_Height = 650;
 
   private:
+    void Build_Opencl();
     void Create_GUI(wxWindow* parent, wxWindowID id);
     void Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id);
     void Create_GUI_Tools(wxWindow* parent, wxWindowID id);
