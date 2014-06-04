@@ -69,7 +69,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(OPENCL)\include\;$(WXWIN)/lib/vc_lib/mswd;$(WXWIN)/include/msvc;$(WXWIN)/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OPENCL)\include\;$(WXWIN)/lib/vc_lib/mswu;$(WXWIN)/include/msvc;$(WXWIN)/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
