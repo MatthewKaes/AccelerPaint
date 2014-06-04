@@ -11,6 +11,11 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#ifdef _DEBUG
+#define OPENCL_TEST
+#endif
+
+
 const long AccelerPaint::ID_OpenItem = wxNewId();
 const long AccelerPaint::ID_OpenLItem = wxNewId();
 const long AccelerPaint::ID_SaveItem = wxNewId();
@@ -152,6 +157,24 @@ void AccelerPaint::OpenFile(wxCommandEvent& event)
 	{
     opencl_img->LoadFile(dlg.GetPath());
     opencl_img->Refresh();
+    
+    //test code
+#ifdef OPENCL_TEST
+    image img_dat;
+    img_dat.rgb_data = opencl_img->GetRGBChannel(0);
+    img_dat.alpha_data = opencl_img->GetAlphaChannel(0);
+    img_dat.pos_data.width = opencl_img->GetCanvasWidth();
+    img_dat.pos_data.height = opencl_img->GetCanvasHeight();
+    color fill_c;
+    fill_c.Alpha = 155;
+    fill_c.Blue = 255;
+    fill_c.Green = 0;
+    fill_c.Red = 255;
+    rect fill_r;
+    fill_r.width = fill_r.height = 100;
+    fill_r.x = fill_r.y = 0;
+    device.Fill(img_dat, fill_r, fill_c);
+#endif
 
     layersinfo->Clear();
     layersinfo->Insert(dlg.GetFilename(), 0);

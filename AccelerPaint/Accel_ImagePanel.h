@@ -21,17 +21,22 @@ public:
   void Refresh();
   void LoadFile(const wxString& name, bool new_layer = false);
   void CheckVisability(int index, bool state);
+  unsigned char* GetRGBChannel(unsigned layer);
+  unsigned char* GetAlphaChannel(unsigned layer);
+  unsigned GetCanvasWidth();
+  unsigned GetCanvasHeight();
   wxBitmap Render();
   unsigned LayerCount();
   std::vector<Layer>& GetLayers();
 
 private:
+  int id;
   long draw_id;
   int img_width, img_height;
+  int scroll_size;
   wxWindow* parent_;
   wxScrollBar* hscroll_;
   wxScrollBar* vscroll_;
-  int id;
   wxImage Background;
   std::vector<Layer> Layers;
   wxPanel* ImagePanel;

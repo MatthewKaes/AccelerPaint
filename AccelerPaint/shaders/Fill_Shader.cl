@@ -28,7 +28,7 @@ __kernel void Fill_Shader(__global unsigned char* RGB_IN, __global unsigned char
     int y = get_global_id(1);
 
     if(x < draw_rect->x || y < draw_rect->y ||
-       x > draw_rect->x + draw_rect->width || y > draw_rect->x + draw_rect->height)
+       x > draw_rect->x + draw_rect->width || y > draw_rect->y + draw_rect->height)
        return;
 
     // Do the operation

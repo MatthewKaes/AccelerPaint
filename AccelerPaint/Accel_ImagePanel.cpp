@@ -8,8 +8,9 @@ Accel_ImagePanel::Accel_ImagePanel(wxWindow* parent, wxScrollBar* hscroll, wxScr
 
   hscroll_ = hscroll;
   vscroll_ = vscroll;
+  scroll_size = hscroll->GetSize().GetHeight();
 
-  Create(parent, 0, 0,  parent->GetSize().GetX() - 18, parent->GetSize().GetY() - 18);
+  Create(parent, 0, 0,  parent->GetSize().GetX() - scroll_size, parent->GetSize().GetY() - scroll_size);
 }
 void Accel_ImagePanel::Create(wxWindow* parent, int x, int y, int width, int height)
 {
@@ -45,7 +46,7 @@ void Accel_ImagePanel::Update(wxPaintEvent& event)
     int x_off, y_off;
 
     //Update scroll width
-    if(img_width < parent_->GetSize().GetWidth() - 18)
+    if(img_width < parent_->GetSize().GetWidth() - scroll_size)
     {
       rend_width = img_width;
       hscroll_->Enable(false);
@@ -53,7 +54,7 @@ void Accel_ImagePanel::Update(wxPaintEvent& event)
     }
     else
     {
-      rend_width = parent_->GetSize().GetWidth() - 18;
+      rend_width = parent_->GetSize().GetWidth() - scroll_size;
       if(!hscroll_->IsEnabled())
       {
         hscroll_->SetThumbPosition(0);
@@ -65,7 +66,7 @@ void Accel_ImagePanel::Update(wxPaintEvent& event)
     }
 
     //Update scroll height
-    if(img_height < parent_->GetSize().GetHeight() - 18)
+    if(img_height < parent_->GetSize().GetHeight() - scroll_size)
     {
       rend_height = img_height;
       vscroll_->Enable(false);
@@ -73,7 +74,7 @@ void Accel_ImagePanel::Update(wxPaintEvent& event)
     }
     else
     {
-      rend_height = parent_->GetSize().GetHeight() - 18;
+      rend_height = parent_->GetSize().GetHeight() - scroll_size;
       if(!vscroll_->IsEnabled())
       {
         vscroll_->SetThumbPosition(0);
@@ -86,7 +87,7 @@ void Accel_ImagePanel::Update(wxPaintEvent& event)
 
     //Make the image the right size and position
     ImagePanel->SetSize(rend_width, rend_height);
-    ImagePanel->SetPosition(wxPoint((parent_->GetSize().GetWidth() - rend_width - 18) / 2, (parent_->GetSize().GetHeight() - rend_height - 18) / 2));
+    ImagePanel->SetPosition(wxPoint((parent_->GetSize().GetWidth() - rend_width - scroll_size) / 2, (parent_->GetSize().GetHeight() - rend_height - scroll_size) / 2));
 	  
     //Render the image
     wxBufferedPaintDC dc(ImagePanel);
@@ -104,6 +105,8 @@ void Accel_ImagePanel::LoadFile(const wxString& name, bool new_layer)
   //quites iCCP warning for PNG files. Temporary fix that quites ALL warnings.
   wxLogNull Nolog;
 
+  //Load the image into the layer it belongs.
+  //If it's not a new layer then wipe the layers
   if(Layers.size() > 0 && !new_layer)
   {
     for(unsigned layer = 1; layer < Layers.size(); layer++)
@@ -123,22 +126,46 @@ void Accel_ImagePanel::LoadFile(const wxString& name, bool new_layer)
   Layers[Layers.size() - 1].Enabled = true;
   Layers[Layers.size() - 1].Image->LoadFile(name);
 
+  //Set alpha channels for images that don't have them.
+  if(!Layers[Layers.size() - 1].Image->GetAlpha())
+  {
+    Layers[Layers.size() - 1].Image->InitAlpha();
+  }
+  
+  //If it's not a new layer then update the canvas size and position.
   if(!new_layer)
   {
     wxImage* ImagePtr = Layers[0].Image;
 
-    img_width = ImagePtr->GetWidth();// + BORDER_SIZE;
-    img_height = ImagePtr->GetHeight();// + BORDER_SIZE;
+    img_width = ImagePtr->GetWidth();
+    img_height = ImagePtr->GetHeight();
 
     ImagePanel->SetSize(img_width, img_height);
-    ImagePanel->SetPosition(wxPoint((parent_->GetSize().GetWidth() - img_width - 18) / 2, 
-                            (parent_->GetSize().GetHeight() - img_height - 18) / 2));
+    ImagePanel->SetPosition(wxPoint((parent_->GetSize().GetWidth() - img_width - scroll_size) / 2, 
+                            (parent_->GetSize().GetHeight() - img_height - scroll_size) / 2));
   }
 }
 void Accel_ImagePanel::CheckVisability(int index, bool state)
 {
   Layers[index].Enabled = state;
 }
+unsigned char* Accel_ImagePanel::GetRGBChannel(unsigned layer)
+{
+  return Layers[layer].Image->GetData();
+}
+unsigned char* Accel_ImagePanel::GetAlphaChannel(unsigned layer)
+{
+  return Layers[layer].Image->GetAlpha();
+}
+unsigned Accel_ImagePanel::GetCanvasWidth()
+{
+  return img_width;
+}
+unsigned Accel_ImagePanel::GetCanvasHeight()
+{
+  return img_height;
+}
+
 wxBitmap Accel_ImagePanel::Render()
 {
   wxMemoryDC dc;

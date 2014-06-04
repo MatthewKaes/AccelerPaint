@@ -100,7 +100,7 @@ bool OpenCL_Dev::Fill(image img_data, rect fill_region, color fill_color)
     return false;
 
   //Channel Buffers
-  unsigned pixel_count = img_data.pos_data.width + img_data.pos_data.height;
+  unsigned pixel_count = img_data.pos_data.width * img_data.pos_data.height;
   cl::Buffer RGB_Chan = cl::Buffer(context_, CL_MEM_READ_WRITE, pixel_count * 3);
   cl::Buffer Alpha_Chan  = cl::Buffer(context_, CL_MEM_READ_WRITE, pixel_count);
   queue_.enqueueWriteBuffer(RGB_Chan, CL_TRUE, 0, pixel_count * 3, img_data.rgb_data);
@@ -114,7 +114,6 @@ bool OpenCL_Dev::Fill(image img_data, rect fill_region, color fill_color)
 
   //Number of threads to run.
   cl::NDRange global(img_data.pos_data.width, img_data.pos_data.height);
-  cl::NDRange local;
 
   //Try to find a better work size then 1.
   //Sizes 128 and 64 are optimum
@@ -127,6 +126,7 @@ bool OpenCL_Dev::Fill(image img_data, rect fill_region, color fill_color)
 
     local_size /= 2;
   }
+  cl::NDRange local(local_size, local_size);
 
   //Set it as an argument
   cl::Kernel* kern = kernels["Fill_Shader"];
@@ -137,7 +137,9 @@ bool OpenCL_Dev::Fill(image img_data, rect fill_region, color fill_color)
   kern->setArg(4, Color_Data);
 
   queue_.enqueueNDRangeKernel(*kern, cl::NullRange, global, local);
-
+  
+  queue_.enqueueReadBuffer(Alpha_Chan, CL_TRUE, 0, pixel_count, img_data.alpha_data);
+  queue_.enqueueReadBuffer(RGB_Chan, CL_TRUE, 0, pixel_count * 3, img_data.rgb_data);
 
   return true;
 }
