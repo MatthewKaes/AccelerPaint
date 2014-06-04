@@ -28,6 +28,7 @@ OpenCL_Dev::OpenCL_Dev()
     devices_ = context.getInfo<CL_CONTEXT_DEVICES>();
  
 
+    //Get device debug info.
     printf("OpenCL 1.1 started successfully.\n\n");
     std::string s = platforms[0].getInfo<CL_PLATFORM_NAME>();
     printf("Platform: %s\n", s.c_str());
@@ -37,8 +38,10 @@ OpenCL_Dev::OpenCL_Dev()
     printf("Device: %s\n", s.c_str());
     s = devices_[0].getInfo<CL_DRIVER_VERSION>();
     printf("Driver: %s\n\n", s.c_str());
+
     platforms_ = platforms;
     context_ = context;
+    queue_ = cl::CommandQueue(context, devices_[0]);
     opencl_enabled = true;
   } 
   // Something horrible happend...
@@ -90,4 +93,51 @@ void OpenCL_Dev::Build_Kernel(const char* name)
     error_msg.append(error.what());
     printf("%s\n", error_msg.c_str());
   }
+}
+bool OpenCL_Dev::Fill(image img_data, rect fill_region, color fill_color)
+{
+  if(!opencl_enabled)
+    return false;
+
+  //Channel Buffers
+  unsigned pixel_count = img_data.pos_data.width + img_data.pos_data.height;
+  cl::Buffer RGB_Chan = cl::Buffer(context_, CL_MEM_READ_WRITE, pixel_count * 3);
+  cl::Buffer Alpha_Chan  = cl::Buffer(context_, CL_MEM_READ_WRITE, pixel_count);
+  queue_.enqueueWriteBuffer(RGB_Chan, CL_TRUE, 0, pixel_count * 3, img_data.rgb_data);
+  queue_.enqueueWriteBuffer(Alpha_Chan, CL_TRUE, 0, pixel_count, img_data.alpha_data);
+
+  //Constant info
+  cl::Buffer Region_Data = cl::Buffer(context_, CL_MEM_READ_ONLY, sizeof(fill_region));
+  cl::Buffer Color_Data  = cl::Buffer(context_, CL_MEM_READ_ONLY, sizeof(fill_color));
+  queue_.enqueueWriteBuffer(Region_Data, CL_TRUE, 0,  sizeof(fill_region), &fill_region);
+  queue_.enqueueWriteBuffer(Color_Data, CL_TRUE, 0, sizeof(fill_color), &fill_color);
+
+  //Number of threads to run.
+  cl::NDRange global(img_data.pos_data.width, img_data.pos_data.height);
+  cl::NDRange local;
+
+  //Try to find a better work size then 1.
+  //Sizes 128 and 64 are optimum
+  int local_size = 128;
+  while(local_size > 1)
+  {
+    if(img_data.pos_data.width % local_size == 0 && 
+      img_data.pos_data.height % local_size == 0)
+      break;
+
+    local_size /= 2;
+  }
+
+  //Set it as an argument
+  cl::Kernel* kern = kernels["Fill_Shader"];
+  kern->setArg(0, RGB_Chan);
+  kern->setArg(1, Alpha_Chan);
+  kern->setArg(2, img_data.pos_data.width);
+  kern->setArg(3, Region_Data);
+  kern->setArg(4, Color_Data);
+
+  queue_.enqueueNDRangeKernel(*kern, cl::NullRange, global, local);
+
+
+  return true;
 }

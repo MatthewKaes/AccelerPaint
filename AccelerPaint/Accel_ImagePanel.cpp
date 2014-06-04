@@ -59,8 +59,8 @@ void Accel_ImagePanel::Update(wxPaintEvent& event)
         hscroll_->SetThumbPosition(0);
         hscroll_->Enable(true);
       }
-      if(hscroll_->GetRange() != img_width - rend_width + 10)
-        hscroll_->SetScrollbar(hscroll_->GetThumbPosition(), hscroll_->GetThumbSize(), (img_width - rend_width + 10), 10);
+      if(hscroll_->GetRange() != img_width - rend_width)
+        hscroll_->SetScrollbar(hscroll_->GetThumbPosition(), hscroll_->GetThumbSize(), (img_width - rend_width), 10);
       x_off = hscroll_->GetThumbPosition();
     }
 
@@ -79,8 +79,8 @@ void Accel_ImagePanel::Update(wxPaintEvent& event)
         vscroll_->SetThumbPosition(0);
         vscroll_->Enable(true);
       }
-      if(vscroll_->GetRange() != img_height - rend_height + 10)
-        vscroll_->SetScrollbar(vscroll_->GetThumbPosition(), vscroll_->GetThumbSize(), img_height - rend_height + 10, 10);
+      if(vscroll_->GetRange() != img_height - rend_height)
+        vscroll_->SetScrollbar(vscroll_->GetThumbPosition(), vscroll_->GetThumbSize(), img_height - rend_height, 10);
       y_off = vscroll_->GetThumbPosition();
     }
 
