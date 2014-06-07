@@ -46,7 +46,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\Fill_Shader.cl">
+    <None Include="shaders\Fill.cl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\Blend.cl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

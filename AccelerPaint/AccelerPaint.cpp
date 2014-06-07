@@ -47,7 +47,8 @@ AccelerPaint::AccelerPaint(wxWindow* parent,wxWindowID id)
 
 void AccelerPaint::Build_Opencl()
 {
-  device.Build_Kernel("Fill_Shader");
+  device.Build_Kernel("Fill");
+  device.Build_Kernel("Blend");
 }
 
 void AccelerPaint::Create_GUI(wxWindow* parent, wxWindowID id)
@@ -212,7 +213,34 @@ void AccelerPaint::SaveRender(wxCommandEvent& event)
 
 	if( dlg.ShowModal() == wxID_OK )
 	{
-    wxImage render(opencl_img->Render().ConvertToImage());
+    wxImage render(opencl_img->GetLayers()->at(0).Image->Copy());
+    image img_final;
+    img_final.rgb_data = render.GetData();
+    img_final.alpha_data = render.GetAlpha();
+    img_final.pos_data.width = render.GetSize().GetWidth();
+    img_final.pos_data.height = render.GetSize().GetHeight();
+    
+    if(!opencl_img->GetVisability(0))
+    { 
+      color fill_c;
+      fill_c.Alpha = fill_c.Blue = fill_c.Green = fill_c.Red = 0;
+      rect fill_r;
+      fill_r.width = render.GetSize().GetWidth();
+      fill_r.height = render.GetSize().GetHeight();
+      fill_r.x = fill_r.y = 0;
+      device.Fill(img_final, fill_r, fill_c);
+    }
+    image next_img;
+    next_img.pos_data = img_final.pos_data;
+    for(int layer = 1; layer < opencl_img->LayerCount(); layer++)
+    {
+      if(opencl_img->GetVisability(layer))
+      {
+        next_img.rgb_data = opencl_img->GetRGBChannel(layer);
+        next_img.alpha_data = opencl_img->GetAlphaChannel(layer);
+        device.Blend(img_final, next_img);
+      }
+    }
     render.SaveFile(dlg.GetPath());
   }
 }

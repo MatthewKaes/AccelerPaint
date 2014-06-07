@@ -1,7 +1,8 @@
-// .cl Files are our "shader" files. They will inform the computer
-// how to preform all the convolutions that we want. 
-// This code runs as a kernel or it's own Mini OS and manages memory
-// by itself. No OS to bulky can slow this code down!
+//Fill.cl
+
+//Takes an image, a rectangle and a color and fills the
+//rectangle on the image with the passed color. Sets RGBA.
+
 
 //#pragma opencl cl_khr_byte_addressable_store : enable
 
@@ -21,7 +22,7 @@ typedef struct rect
     unsigned height;
 } rect;
 
-__kernel void Fill_Shader(__global unsigned char* RGB_IN, __global unsigned char* ALPHA_IN, unsigned WIDTH_IN, 
+__kernel void Fill(__global unsigned char* RGB_IN, __global unsigned char* ALPHA_IN, unsigned WIDTH_IN, 
 						  __constant struct rect* draw_rect, __constant struct color* fill) {
     // Get the index of the current element to be processed
     int x = get_global_id(0);

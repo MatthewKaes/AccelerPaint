@@ -40,6 +40,7 @@ public:
   OpenCL_Dev();
   void Build_Kernel(const char* name);
   bool Fill(image img_data, rect fill_region, color fill_color);
+  bool Blend(image img_base, image img_forground);
 
 private:
   cl::vector<cl::Platform> platforms_;

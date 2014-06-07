@@ -23,11 +23,11 @@ public:
   void CheckVisability(int index, bool state);
   unsigned char* GetRGBChannel(unsigned layer);
   unsigned char* GetAlphaChannel(unsigned layer);
+  bool GetVisability(unsigned layer);
   unsigned GetCanvasWidth();
   unsigned GetCanvasHeight();
-  wxBitmap Render();
   unsigned LayerCount();
-  std::vector<Layer>& GetLayers();
+  std::vector<Layer>* GetLayers();
 
 private:
   int id;

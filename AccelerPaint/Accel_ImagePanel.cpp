@@ -157,6 +157,10 @@ unsigned char* Accel_ImagePanel::GetAlphaChannel(unsigned layer)
 {
   return Layers[layer].Image->GetAlpha();
 }
+bool Accel_ImagePanel::GetVisability(unsigned layer)
+{
+  return Layers[layer].Enabled;
+}
 unsigned Accel_ImagePanel::GetCanvasWidth()
 {
   return img_width;
@@ -166,24 +170,11 @@ unsigned Accel_ImagePanel::GetCanvasHeight()
   return img_height;
 }
 
-wxBitmap Accel_ImagePanel::Render()
-{
-  wxMemoryDC dc;
-  wxBitmap output(img_width, img_height, dc);
-  dc.SelectObject(output);
-
-  for(unsigned layer = 0; layer < Layers.size(); layer++)
-    if(Layers[layer].Enabled)
-      dc.DrawBitmap(*Layers[layer].Image, 0, 0, true);
-
-  return output;
-}
-
 unsigned Accel_ImagePanel::LayerCount()
 {
   return Layers.size();
 }
-std::vector<Layer>& Accel_ImagePanel::GetLayers()
+std::vector<Layer>* Accel_ImagePanel::GetLayers()
 {
-  return Layers;
+  return &Layers;
 }
