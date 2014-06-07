@@ -6,11 +6,19 @@ A simple open source image manipulation software with OpenCL acceleration. Accel
 Current Interface
 ![Current Setup](img/Sample.png?raw=true)
 
-Example .JPEG Rendering
-![Current Setup](img/render.jpg?raw=true)
+Rendering
+=========
 
-Current output rendering uses wxWidgets to blend the images together currently. This leads to mixed results with alpha channels that are only slightly transparent. The OpenCL Alpha Blending Kernel is being written first to handel the issue but there isn't a better working solution just yet for computers where OpenCL is not supported.
+AccelerPaint currently only allows for blending (Alpha Blending) when rendering. This produces an output image the same as the one viewed in the viewport. Rendering is also OpenCL acclerated to maximize the speed of producing the final image.
 
+Layer 0:
+![Layer0](img/img1.png?raw=true)
+
+Layer 1:
+![Layer0](img/img2.png?raw=true)
+
+Rendered Output:
+![Layer0](img/img3.png?raw=true)
 
 Multiplatform
 =============
