@@ -144,6 +144,14 @@ void Accel_ImagePanel::LoadFile(const wxString& name, bool new_layer)
     ImagePanel->SetPosition(wxPoint((parent_->GetSize().GetWidth() - img_width - scroll_size) / 2, 
                             (parent_->GetSize().GetHeight() - img_height - scroll_size) / 2));
   }
+  //Resize to the canvas if it is a new layer
+  else
+  {
+    if(Layers[Layers.size() - 1].Image->GetSize() != Layers[0].Image->GetSize())
+    {
+      Layers[Layers.size() - 1].Image->Resize(Layers[0].Image->GetSize(), wxPoint(0, 0));
+    }
+  }
 }
 void Accel_ImagePanel::CheckVisability(int index, bool state)
 {

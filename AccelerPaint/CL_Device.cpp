@@ -152,8 +152,8 @@ bool OpenCL_Dev::Blend(image img_base, image img_forground)
   unsigned pixel_count = img_base.pos_data.width * img_base.pos_data.height;
   cl::Buffer RGB_Chan = cl::Buffer(context_, CL_MEM_READ_WRITE, pixel_count * 3);
   cl::Buffer Alpha_Chan  = cl::Buffer(context_, CL_MEM_READ_WRITE, pixel_count);
-  cl::Buffer RGB_Chan2 = cl::Buffer(context_, CL_MEM_READ_ONLY, pixel_count * 3);
-  cl::Buffer Alpha_Chan2  = cl::Buffer(context_, CL_MEM_READ_ONLY, pixel_count);
+  cl::Buffer RGB_Chan2 = cl::Buffer(context_, CL_MEM_READ_WRITE, pixel_count * 3);
+  cl::Buffer Alpha_Chan2  = cl::Buffer(context_, CL_MEM_READ_WRITE, pixel_count);
   queue_.enqueueWriteBuffer(RGB_Chan, CL_TRUE, 0, pixel_count * 3, img_base.rgb_data);
   queue_.enqueueWriteBuffer(Alpha_Chan, CL_TRUE, 0, pixel_count, img_base.alpha_data);
   queue_.enqueueWriteBuffer(RGB_Chan2, CL_TRUE, 0, pixel_count * 3, img_forground.rgb_data);

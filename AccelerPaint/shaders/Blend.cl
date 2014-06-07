@@ -7,10 +7,10 @@
 //#pragma opencl cl_khr_byte_addressable_store : enable
 
 __kernel void Blend(__global unsigned char* RGB_BACK, __global unsigned char* ALPHA_BACK, unsigned WIDTH_IN, 
-						  __constant unsigned char* RGB_FOR, __global unsigned char* ALPHA_FOR) {
+				    __global unsigned char* RGB_FOR, __global unsigned char* ALPHA_FOR) {
     // Get the index of the current element to be processed
-    int x = get_global_id(0);
-    int y = get_global_id(1);
+    int x = get_global_id(0); 
+    int y = get_global_id(1); 
 
     // Do the operation
     // Invert all 4 bytes in one go to be SUPER fast.
