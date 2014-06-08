@@ -103,14 +103,24 @@ bool OpenCL_Dev::Fill(image img_data, rect fill_region, color fill_color)
   unsigned pixel_count = img_data.pos_data.width * img_data.pos_data.height;
   cl::Buffer RGB_Chan = cl::Buffer(context_, CL_MEM_READ_WRITE, pixel_count * 3);
   cl::Buffer Alpha_Chan  = cl::Buffer(context_, CL_MEM_READ_WRITE, pixel_count);
-  queue_.enqueueWriteBuffer(RGB_Chan, CL_TRUE, 0, pixel_count * 3, img_data.rgb_data);
-  queue_.enqueueWriteBuffer(Alpha_Chan, CL_TRUE, 0, pixel_count, img_data.alpha_data);
+  
+  //Don't block for our events.
+  //Run other code while we wait for them to enqueue we will block
+  //on them later when enqueueing the kernel range.
+  cl::vector< cl::Event > Events;
+  cl::Event new_event;
+  queue_.enqueueWriteBuffer(RGB_Chan, CL_FALSE, 0, pixel_count * 3, img_data.rgb_data, NULL, &new_event);
+  Events.push_back(new_event);
+  queue_.enqueueWriteBuffer(Alpha_Chan, CL_FALSE, 0, pixel_count, img_data.alpha_data, NULL, &new_event);
+  Events.push_back(new_event);
 
   //Constant info
   cl::Buffer Region_Data = cl::Buffer(context_, CL_MEM_READ_ONLY, sizeof(fill_region));
   cl::Buffer Color_Data  = cl::Buffer(context_, CL_MEM_READ_ONLY, sizeof(fill_color));
-  queue_.enqueueWriteBuffer(Region_Data, CL_TRUE, 0,  sizeof(fill_region), &fill_region);
-  queue_.enqueueWriteBuffer(Color_Data, CL_TRUE, 0, sizeof(fill_color), &fill_color);
+  queue_.enqueueWriteBuffer(Region_Data, CL_FALSE, 0,  sizeof(fill_region), &fill_region, NULL, &new_event);
+  Events.push_back(new_event);
+  queue_.enqueueWriteBuffer(Color_Data, CL_FALSE, 0, sizeof(fill_color), &fill_color, NULL, &new_event);
+  Events.push_back(new_event);
 
   //Number of threads to run.
   cl::NDRange global(img_data.pos_data.width, img_data.pos_data.height);
@@ -136,7 +146,7 @@ bool OpenCL_Dev::Fill(image img_data, rect fill_region, color fill_color)
   kern->setArg(3, Region_Data);
   kern->setArg(4, Color_Data);
 
-  queue_.enqueueNDRangeKernel(*kern, cl::NullRange, global, local);
+  queue_.enqueueNDRangeKernel(*kern, cl::NullRange, global, local, &Events);
   
   queue_.enqueueReadBuffer(Alpha_Chan, CL_TRUE, 0, pixel_count, img_data.alpha_data);
   queue_.enqueueReadBuffer(RGB_Chan, CL_TRUE, 0, pixel_count * 3, img_data.rgb_data);
@@ -154,10 +164,20 @@ bool OpenCL_Dev::Blend(image img_base, image img_forground)
   cl::Buffer Alpha_Chan  = cl::Buffer(context_, CL_MEM_READ_WRITE, pixel_count);
   cl::Buffer RGB_Chan2 = cl::Buffer(context_, CL_MEM_READ_WRITE, pixel_count * 3);
   cl::Buffer Alpha_Chan2  = cl::Buffer(context_, CL_MEM_READ_WRITE, pixel_count);
-  queue_.enqueueWriteBuffer(RGB_Chan, CL_TRUE, 0, pixel_count * 3, img_base.rgb_data);
-  queue_.enqueueWriteBuffer(Alpha_Chan, CL_TRUE, 0, pixel_count, img_base.alpha_data);
-  queue_.enqueueWriteBuffer(RGB_Chan2, CL_TRUE, 0, pixel_count * 3, img_forground.rgb_data);
-  queue_.enqueueWriteBuffer(Alpha_Chan2, CL_TRUE, 0, pixel_count, img_forground.alpha_data);
+  
+  //Don't block for our events.
+  //Run other code while we wait for them to enqueue we will block
+  //on them later when enqueueing the kernel range.
+  cl::vector< cl::Event > Events;
+  cl::Event new_event;
+  queue_.enqueueWriteBuffer(RGB_Chan, CL_FALSE, 0, pixel_count * 3, img_base.rgb_data, NULL, &new_event);
+  Events.push_back(new_event);
+  queue_.enqueueWriteBuffer(Alpha_Chan, CL_FALSE, 0, pixel_count, img_base.alpha_data, NULL, &new_event);
+  Events.push_back(new_event);
+  queue_.enqueueWriteBuffer(RGB_Chan2, CL_FALSE, 0, pixel_count * 3, img_forground.rgb_data, NULL, &new_event);
+  Events.push_back(new_event);
+  queue_.enqueueWriteBuffer(Alpha_Chan2, CL_FALSE, 0, pixel_count, img_forground.alpha_data, NULL, &new_event);
+  Events.push_back(new_event);
 
   //Number of threads to run.
   cl::NDRange global(img_base.pos_data.width, img_forground.pos_data.height);
@@ -174,7 +194,7 @@ bool OpenCL_Dev::Blend(image img_base, image img_forground)
     local_size /= 2;
   }
   cl::NDRange local(local_size, local_size);
-
+  ;
   //Set it as an argument
   cl::Kernel* kern = kernels["Blend"];
   kern->setArg(0, RGB_Chan);
@@ -183,7 +203,9 @@ bool OpenCL_Dev::Blend(image img_base, image img_forground)
   kern->setArg(3, RGB_Chan2);
   kern->setArg(4, Alpha_Chan2);
 
-  queue_.enqueueNDRangeKernel(*kern, cl::NullRange, global, local);
+  //enqueue the Range to run the kernal, also wait for our write buffers to 
+  //be enqueued if they aren't done yet
+  queue_.enqueueNDRangeKernel(*kern, cl::NullRange, global, local, &Events);
   
   queue_.enqueueReadBuffer(Alpha_Chan, CL_TRUE, 0, pixel_count, img_base.alpha_data);
   queue_.enqueueReadBuffer(RGB_Chan, CL_TRUE, 0, pixel_count * 3, img_base.rgb_data);
