@@ -17,8 +17,10 @@
 #include <vector>
 #include <string>
 
-#define TOOLFRAME_WIDTH 40
+#define TOOLFRAME_WIDTH 30
 #define TOOLFRAME_HEIGHT 400
+#define TOOLFRAME_BUFFER 4
+#define TOOLFRAME_SEPERATOR 5
 #define LAYERFRAME_WIDTH 220
 #define LAYERFRAME_HEIGHT 330
 #define SCROLL_BORDER_SIZE 7
@@ -43,6 +45,8 @@ class AccelerPaint : public wxFrame
     void Create_GUI_ImagePanel(wxWindow* parent, wxWindowID id);
     void Create_GUI_Tools(wxWindow* parent, wxWindowID id);
     void Create_GUI_Tools_Color(wxWindow* parent, unsigned toolindex);
+    void Create_GUI_Tool_Generic(wxWindow* parent, unsigned toolindex, const char* img_path, const char* tooltip);
+    void Create_GUI_Tool_Sperator(wxWindow* parent, unsigned toolindex);
     void ResizeWindow(wxSizeEvent& event);
     void OpenFile(wxCommandEvent& event);
     void OpenLayer(wxCommandEvent& event);
@@ -51,6 +55,9 @@ class AccelerPaint : public wxFrame
     void ImageBackground(wxPaintEvent& event);
     void ImageScroll(wxScrollEvent& event);
     void ColorPicker(wxCommandEvent& event);
+    void ToolSelected(wxCommandEvent& event);
+
+    void Toolsupdate(int tool);
     
     wxPanel* layerframe;
     wxPanel* toolspanel;
@@ -62,10 +69,14 @@ class AccelerPaint : public wxFrame
     wxCheckListBox* layersinfo;
     wxButton *ColorButton;
 
+    std::vector<wxBitmapButton*> toolbuttons;
+
     wxColour pickedcolor;
     Accel_ImagePanel* opencl_img;
     OpenCL_Dev device;
-
+    
+    unsigned seperators;
+    unsigned selected_tool;
     
     static const long ID_OpenItem;
     static const long ID_OpenLItem;

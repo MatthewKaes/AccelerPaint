@@ -138,16 +138,53 @@ void AccelerPaint::Create_GUI_Tools(wxWindow* parent, wxWindowID id)
   toolspanel = new wxPanel(this, wxNewId(), wxPoint(0,0), wxSize(TOOLFRAME_WIDTH,TOOLFRAME_HEIGHT), wxRAISED_BORDER);
 
   unsigned toolindex = 0;
+  seperators = 0;
+  Create_GUI_Tool_Generic(toolspanel, toolindex++, "./resources/arrow.png", "Move Tool");
+  Create_GUI_Tool_Generic(toolspanel, toolindex++, "./resources/select.png", "Selection Tool");
+  Create_GUI_Tool_Sperator(toolspanel, toolindex);
+  Create_GUI_Tool_Generic(toolspanel, toolindex++, "./resources/brush.png", "Brush Tool");
+  Create_GUI_Tool_Generic(toolspanel, toolindex++, "./resources/fill.png", "Fill Tool");
+  Create_GUI_Tool_Sperator(toolspanel, toolindex);
   Create_GUI_Tools_Color(toolspanel, toolindex++);
+  
+  Toolsupdate(0);
+}
+void AccelerPaint::Create_GUI_Tool_Generic(wxWindow* parent, unsigned toolindex, const char* img_path, const char* tooltip)
+{
+  //Quite png loader
+  wxLogNull Nolog;
+  unsigned Button_event = wxNewId();
+  wxImage img;
+  img.LoadFile(img_path);
+  wxBitmapButton* button = new wxBitmapButton(parent, Button_event, img, wxPoint(0,0), wxSize(0,0), wxBORDER_NONE);
+  button->SetSize(TOOLFRAME_WIDTH - TOOLFRAME_BUFFER * 2, TOOLFRAME_WIDTH - TOOLFRAME_BUFFER * 2);
+  button->SetPosition(wxPoint(1, (TOOLFRAME_WIDTH - TOOLFRAME_BUFFER - 3) * toolindex + TOOLFRAME_SEPERATOR * seperators));
+  button->SetToolTip(new wxToolTip(tooltip));
+
+  toolbuttons.push_back(button);
+
+  Connect(Button_event, wxEVT_BUTTON,(wxObjectEventFunction)&AccelerPaint::ToolSelected);
+}
+void AccelerPaint::Create_GUI_Tool_Sperator(wxWindow* parent, unsigned toolindex)
+{
+  //Quite png loader
+  wxLogNull Nolog;
+  wxImage img;
+  img.LoadFile("./resources/seperator.png");
+  wxStaticBitmap* bitm = new wxStaticBitmap(parent, wxNewId(), wxBitmap(img));
+  //img->SetSize(TOOLFRAME_WIDTH, TOOLFRAME_BUFFER - 2);
+  bitm->SetPosition(wxPoint(1, (TOOLFRAME_WIDTH - TOOLFRAME_BUFFER - 3) * toolindex + 2 + TOOLFRAME_SEPERATOR * seperators));
+  seperators++;
 }
 void AccelerPaint::Create_GUI_Tools_Color(wxWindow* parent, unsigned toolindex)
 {
   unsigned Button_event = wxNewId();
-  ColorButton = new wxButton(parent, Button_event, _(""));
-  ColorButton->SetSize(TOOLFRAME_WIDTH - 4 * 2, TOOLFRAME_WIDTH - 4 * 2);
-  ColorButton->SetPosition(wxPoint(1, TOOLFRAME_WIDTH * toolindex + 3));
+  ColorButton = new wxButton(parent, Button_event, _(""), wxPoint(0,0), wxSize(0,0), wxBORDER_NONE );
+  ColorButton->SetSize(TOOLFRAME_WIDTH - TOOLFRAME_BUFFER * 2 - 1, TOOLFRAME_WIDTH - TOOLFRAME_BUFFER * 2 - 2);
+  ColorButton->SetPosition(wxPoint(1, (TOOLFRAME_WIDTH - TOOLFRAME_BUFFER - 3) * toolindex + 2 + TOOLFRAME_SEPERATOR * seperators));
   pickedcolor = *wxBLACK;
   ColorButton->SetBackgroundColour(pickedcolor);
+  ColorButton->SetToolTip(new wxToolTip("Select Tool Color"));
   
   Connect(Button_event, wxEVT_BUTTON,(wxObjectEventFunction)&AccelerPaint::ColorPicker);
 }
@@ -286,4 +323,26 @@ void AccelerPaint::ImageScroll(wxScrollEvent& event)
     pickedcolor = dlg.GetColourData().GetColour();
     ColorButton->SetBackgroundColour(pickedcolor);
   }
- }
+}
+void AccelerPaint::ToolSelected(wxCommandEvent& event)
+{
+  for(unsigned i = 0; i < toolbuttons.size(); i++)
+  {
+    if(toolbuttons[i] == event.GetEventObject())
+    {
+      Toolsupdate(i);
+      return;
+    }
+  }
+}
+void AccelerPaint::Toolsupdate(int tool)
+{
+  for(unsigned i = 0; i < toolbuttons.size(); i++)
+  {
+    if(i == tool)
+      toolbuttons[i]->Enable(false);
+    else
+      toolbuttons[i]->Enable(true);
+  }
+  selected_tool = tool;
+}
