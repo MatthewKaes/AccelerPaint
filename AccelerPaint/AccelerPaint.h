@@ -9,6 +9,7 @@
 #include <wx/button.h>
 #include <wx/frame.h>
 #include <wx/checklst.h>
+#include <wx/colordlg.h>
 
 #include <wx/image.h>
 #include "CL_Device.h"
@@ -38,9 +39,10 @@ class AccelerPaint : public wxFrame
     void Build_Opencl();
     void Create_GUI(wxWindow* parent, wxWindowID id);
     void Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id);
-    void Create_GUI_Tools(wxWindow* parent, wxWindowID id);
     void Create_GUI_Layers(wxWindow* parent, wxWindowID id);
     void Create_GUI_ImagePanel(wxWindow* parent, wxWindowID id);
+    void Create_GUI_Tools(wxWindow* parent, wxWindowID id);
+    void Create_GUI_Tools_Color(wxWindow* parent, unsigned toolindex);
     void ResizeWindow(wxSizeEvent& event);
     void OpenFile(wxCommandEvent& event);
     void OpenLayer(wxCommandEvent& event);
@@ -48,6 +50,7 @@ class AccelerPaint : public wxFrame
     void LayerChecked(wxCommandEvent& event);
     void ImageBackground(wxPaintEvent& event);
     void ImageScroll(wxScrollEvent& event);
+    void ColorPicker(wxCommandEvent& event);
     
     wxPanel* layerframe;
     wxPanel* toolspanel;
@@ -57,7 +60,9 @@ class AccelerPaint : public wxFrame
     wxMenuBar* menustrip;
     wxMenu* filemenu;
     wxCheckListBox* layersinfo;
+    wxButton *ColorButton;
 
+    wxColour pickedcolor;
     Accel_ImagePanel* opencl_img;
     OpenCL_Dev device;
 

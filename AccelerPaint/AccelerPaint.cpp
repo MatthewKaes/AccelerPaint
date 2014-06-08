@@ -95,11 +95,6 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
   Connect(ID_OpenLItem, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::OpenLayer);
   Connect(ID_SaveItem, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::SaveRender);
 }
-void AccelerPaint::Create_GUI_Tools(wxWindow* parent, wxWindowID id)
-{
-  //Construct SideFrame
-  toolspanel = new wxPanel(this, wxNewId(), wxPoint(0,0), wxSize(TOOLFRAME_WIDTH,TOOLFRAME_HEIGHT), wxRAISED_BORDER);
-}
 void AccelerPaint::Create_GUI_Layers(wxWindow* parent, wxWindowID id)
 {
   //Construct Layers
@@ -136,6 +131,25 @@ void AccelerPaint::Create_GUI_ImagePanel(wxWindow* parent, wxWindowID id)
   Connect(ID_HScroll, wxEVT_SCROLL_CHANGED,(wxObjectEventFunction)&AccelerPaint::ImageScroll);
   Connect(ID_VScroll, wxEVT_SCROLL_CHANGED,(wxObjectEventFunction)&AccelerPaint::ImageScroll);
 
+}
+void AccelerPaint::Create_GUI_Tools(wxWindow* parent, wxWindowID id)
+{
+  //Construct SideFrame
+  toolspanel = new wxPanel(this, wxNewId(), wxPoint(0,0), wxSize(TOOLFRAME_WIDTH,TOOLFRAME_HEIGHT), wxRAISED_BORDER);
+
+  unsigned toolindex = 0;
+  Create_GUI_Tools_Color(toolspanel, toolindex++);
+}
+void AccelerPaint::Create_GUI_Tools_Color(wxWindow* parent, unsigned toolindex)
+{
+  unsigned Button_event = wxNewId();
+  ColorButton = new wxButton(parent, Button_event, _(""));
+  ColorButton->SetSize(TOOLFRAME_WIDTH - 4 * 2, TOOLFRAME_WIDTH - 4 * 2);
+  ColorButton->SetPosition(wxPoint(1, TOOLFRAME_WIDTH * toolindex + 3));
+  pickedcolor = *wxBLACK;
+  ColorButton->SetBackgroundColour(pickedcolor);
+  
+  Connect(Button_event, wxEVT_BUTTON,(wxObjectEventFunction)&AccelerPaint::ColorPicker);
 }
 void AccelerPaint::ResizeWindow(wxSizeEvent& event)
 {
@@ -232,7 +246,7 @@ void AccelerPaint::SaveRender(wxCommandEvent& event)
     }
     image next_img;
     next_img.pos_data = img_final.pos_data;
-    for(int layer = 1; layer < opencl_img->LayerCount(); layer++)
+    for(unsigned layer = 1; layer < opencl_img->LayerCount(); layer++)
     {
       if(opencl_img->GetVisability(layer))
       {
@@ -263,3 +277,13 @@ void AccelerPaint::ImageScroll(wxScrollEvent& event)
 {
   opencl_img->Refresh();
 }
+ void AccelerPaint::ColorPicker(wxCommandEvent& event)
+ {
+   wxColourDialog  dlg(this);
+
+	if( dlg.ShowModal() == wxID_OK )
+	{
+    pickedcolor = dlg.GetColourData().GetColour();
+    ColorButton->SetBackgroundColour(pickedcolor);
+  }
+ }
