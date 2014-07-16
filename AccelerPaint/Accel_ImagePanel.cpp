@@ -153,6 +153,42 @@ void Accel_ImagePanel::LoadFile(const wxString& name, bool new_layer)
     }
   }
 }
+void Accel_ImagePanel::LoadFile(int width, int height, unsigned char* data, unsigned char* alpha, bool new_layer)
+{  
+  //Update Fix:
+  //quites iCCP warning for PNG files. Temporary fix that quites ALL warnings.
+  wxLogNull Nolog;
+
+  //Load the image into the layer it belongs.
+  //If it's not a new layer then wipe the layers
+  if(Layers.size() > 0 && !new_layer)
+  {
+    for(unsigned layer = 1; layer < Layers.size(); layer++)
+    {
+      Layers[layer].Image->Destroy();
+      delete Layers[layer].Image;
+    }
+    Layers.clear();
+  }
+
+  Layer new_lay;
+  new_lay.Image = new wxImage(width, height, data, alpha);
+  new_lay.Enabled = true;
+  Layers.push_back(new_lay);
+  
+  //If it's not a new layer then update the canvas size and position.
+  if(!new_layer)
+  {
+    wxImage* ImagePtr = Layers[0].Image;
+
+    img_width = ImagePtr->GetWidth();
+    img_height = ImagePtr->GetHeight();
+
+    ImagePanel->SetSize(img_width, img_height);
+    ImagePanel->SetPosition(wxPoint((parent_->GetSize().GetWidth() - img_width - scroll_size) / 2, 
+                            (parent_->GetSize().GetHeight() - img_height - scroll_size) / 2));
+  }
+}
 void Accel_ImagePanel::CheckVisability(int index, bool state)
 {
   Layers[index].Enabled = state;

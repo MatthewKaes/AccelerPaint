@@ -17,6 +17,7 @@
 #include <vector>
 #include <string>
 
+#define COLOR_DEPTH 3
 #define TOOLFRAME_WIDTH 30
 #define TOOLFRAME_HEIGHT 400
 #define TOOLFRAME_BUFFER 4
@@ -25,6 +26,8 @@
 #define LAYERFRAME_HEIGHT 330
 #define SCROLL_BORDER_SIZE 7
 #define SCROLL_SIZE_WIDTH 18
+#define ACCELER_SIGNITURE 0xAC00E521
+#define ACCELER_VERSION 1
 
 #define BACKGROUND_COLOR wxColour(100,100,100)
 
@@ -38,6 +41,22 @@ class AccelerPaint : public wxFrame
     static const unsigned Program_Min_Height = 650;
 
   private:
+    typedef struct Acceler_Data
+    {
+	    unsigned signature;
+      unsigned version;
+      unsigned i_width;
+	    unsigned i_height;
+	    unsigned layer_count;
+    } Acceler_Data;
+
+    typedef struct Layer_Data
+    {
+	    bool visible;
+	    float opacity;
+    } Layer_Data;
+
+
     void Build_Opencl();
     void Create_GUI(wxWindow* parent, wxWindowID id);
     void Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id);
@@ -84,8 +103,6 @@ class AccelerPaint : public wxFrame
     static const long ID_Layer;
     static const long ID_HScroll;
     static const long ID_VScroll;
-
-    
 
     DECLARE_EVENT_TABLE()
 };

@@ -20,7 +20,9 @@ public:
   void Remove();
   void Refresh();
   void LoadFile(const wxString& name, bool new_layer = false);
+  void LoadFile(int width, int height, unsigned char* data, unsigned char* alpha, bool new_layer = false);
   void CheckVisability(int index, bool state);
+  void Empty();
   unsigned char* GetRGBChannel(unsigned layer);
   unsigned char* GetAlphaChannel(unsigned layer);
   bool GetVisability(unsigned layer);

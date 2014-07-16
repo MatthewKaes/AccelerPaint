@@ -5,6 +5,7 @@
 #include <wx/msgdlg.h>
 #include <wx/intl.h>
 #include <wx/string.h>
+#include <wx/wfstream.h>
  #include <sstream>
 
 #ifdef _MSC_VER
@@ -203,34 +204,50 @@ void AccelerPaint::ResizeWindow(wxSizeEvent& event)
 void AccelerPaint::OpenFile(wxCommandEvent& event)
 {
   //Simply call load dialog
-  wxFileDialog  dlg( this, _T("Select a supported Image file"), wxEmptyString, wxEmptyString, _T("PNG files (*.png)|*.png|JPG files (*.jpg)|*.jpg|BMP files (*.bmp)|*.bmp|GIF files (*.gif)|*.gif"), wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+  wxFileDialog  dlg( this, _T("Select a supported Image file"), wxEmptyString, wxEmptyString, _T("Acceler Source (*.acl)|*.acl|PNG files (*.png)|*.png|JPG files (*.jpg)|*.jpg|BMP files (*.bmp)|*.bmp|GIF files (*.gif)|*.gif"), wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+
 
 	if( dlg.ShowModal() == wxID_OK )
 	{
-    opencl_img->LoadFile(dlg.GetPath());
-    opencl_img->Refresh();
-    
-    //test code
-#ifdef OPENCL_TEST
-    image img_dat;
-    img_dat.rgb_data = opencl_img->GetRGBChannel(0);
-    img_dat.alpha_data = opencl_img->GetAlphaChannel(0);
-    img_dat.pos_data.width = opencl_img->GetCanvasWidth();
-    img_dat.pos_data.height = opencl_img->GetCanvasHeight();
-    color fill_c;
-    fill_c.Alpha = 155;
-    fill_c.Blue = 255;
-    fill_c.Green = 0;
-    fill_c.Red = 255;
-    rect fill_r;
-    fill_r.width = fill_r.height = 100;
-    fill_r.x = fill_r.y = 0;
-    device.Fill(img_dat, fill_r, fill_c);
-#endif
+    //load acceler files
+    if(dlg.GetFilterIndex() == 0)
+    {      
+      wxFileInputStream input_stream(dlg.GetPath());
+      if (!input_stream.IsOk())
+      {
+          wxLogError("Unable to aquire stream from acceler saving.", dlg.GetPath());
+          return;
+      }
+      layersinfo->Clear();
 
-    layersinfo->Clear();
-    layersinfo->Insert(dlg.GetFilename(), 0);
-    layersinfo->Check(0);
+      Acceler_Data datagram;
+      input_stream.ReadAll(&datagram, sizeof(datagram));
+      for(unsigned layer = 0; layer < datagram.layer_count; layer++)
+      {
+        unsigned char* data = new unsigned char[datagram.i_height * datagram.i_width * COLOR_DEPTH];
+        unsigned char* alpha = new unsigned char[datagram.i_height * datagram.i_width];
+        Layer_Data discriptor;
+        input_stream.ReadAll(&discriptor, sizeof(discriptor));
+        input_stream.ReadAll(data, datagram.i_height * datagram.i_width * COLOR_DEPTH);
+        input_stream.ReadAll(alpha, datagram.i_height * datagram.i_width);
+        opencl_img->LoadFile(datagram.i_width, datagram.i_height, data, alpha, layer != 0);
+        opencl_img->CheckVisability(layer, discriptor.visible);
+        
+        layersinfo->Insert(dlg.GetFilename(), 0);
+        if(discriptor.visible)
+          layersinfo->Check(-1);
+      }
+    }
+    //load everything else
+    else
+    {
+      opencl_img->LoadFile(dlg.GetPath());
+      opencl_img->Refresh();
+
+      layersinfo->Clear();
+      layersinfo->Insert(dlg.GetFilename(), 0);
+      layersinfo->Check(0);
+    }
   }
 }
 void AccelerPaint::OpenLayer(wxCommandEvent& event)
@@ -260,39 +277,69 @@ void AccelerPaint::SaveRender(wxCommandEvent& event)
     return;
   }
   //Simply call save dialog
-  wxFileDialog  dlg( this, _T("Save As..."), wxEmptyString, wxEmptyString, _T("PNG files (*.png)|*.png|JPG files (*.jpg)|*.jpg|BMP files (*.bmp)|*.bmp"), wxFD_SAVE);
+  wxFileDialog  dlg( this, _T("Save As..."), wxEmptyString, wxEmptyString, _T("Acceler Source (*.acl)|*.acl|PNG files (*.png)|*.png|JPG files (*.jpg)|*.jpg|BMP files (*.bmp)|*.bmp"), wxFD_SAVE);
 
 	if( dlg.ShowModal() == wxID_OK )
 	{
-    wxImage render(opencl_img->GetLayers()->at(0).Image->Copy());
-    image img_final;
-    img_final.rgb_data = render.GetData();
-    img_final.alpha_data = render.GetAlpha();
-    img_final.pos_data.width = render.GetSize().GetWidth();
-    img_final.pos_data.height = render.GetSize().GetHeight();
-    
-    if(!opencl_img->GetVisability(0))
-    { 
-      color fill_c;
-      fill_c.Alpha = fill_c.Blue = fill_c.Green = fill_c.Red = 0;
-      rect fill_r;
-      fill_r.width = render.GetSize().GetWidth();
-      fill_r.height = render.GetSize().GetHeight();
-      fill_r.x = fill_r.y = 0;
-      device.Fill(img_final, fill_r, fill_c);
-    }
-    image next_img;
-    next_img.pos_data = img_final.pos_data;
-    for(unsigned layer = 1; layer < opencl_img->LayerCount(); layer++)
+    //Saving acceler files
+    if(dlg.GetFilterIndex() == 0)
     {
-      if(opencl_img->GetVisability(layer))
+      wxFileOutputStream output_stream(dlg.GetPath());
+      if (!output_stream.IsOk())
       {
-        next_img.rgb_data = opencl_img->GetRGBChannel(layer);
-        next_img.alpha_data = opencl_img->GetAlphaChannel(layer);
-        device.Blend(img_final, next_img);
+          wxLogError("Unable to aquire stream from acceler saving.", dlg.GetPath());
+          return;
+      }
+      Acceler_Data datagram;
+      datagram.i_height = opencl_img->GetCanvasHeight();
+      datagram.i_width = opencl_img->GetCanvasWidth();
+      datagram.layer_count = opencl_img->LayerCount();
+      datagram.signature = ACCELER_SIGNITURE;
+      datagram.version = ACCELER_VERSION;
+      output_stream.WriteAll(&datagram, sizeof(datagram));
+      for(unsigned layer = 0; layer < opencl_img->LayerCount(); layer++)
+      {
+        Layer_Data discriptor;
+        discriptor.opacity = 1.0f;
+        discriptor.visible = opencl_img->GetVisability(layer);
+        output_stream.WriteAll(&discriptor, sizeof(discriptor));
+        output_stream.WriteAll(opencl_img->GetRGBChannel(layer), datagram.i_height * datagram.i_width * COLOR_DEPTH);
+        output_stream.WriteAll(opencl_img->GetAlphaChannel(layer), datagram.i_height * datagram.i_width);
       }
     }
-    render.SaveFile(dlg.GetPath());
+    //Rendering an actual image
+    else
+    {
+      wxImage render(opencl_img->GetLayers()->at(0).Image->Copy());
+      image img_final;
+      img_final.rgb_data = render.GetData();
+      img_final.alpha_data = render.GetAlpha();
+      img_final.pos_data.width = render.GetSize().GetWidth();
+      img_final.pos_data.height = render.GetSize().GetHeight();
+    
+      if(!opencl_img->GetVisability(0))
+      { 
+        color fill_c;
+        fill_c.Alpha = fill_c.Blue = fill_c.Green = fill_c.Red = 0;
+        rect fill_r;
+        fill_r.width = render.GetSize().GetWidth();
+        fill_r.height = render.GetSize().GetHeight();
+        fill_r.x = fill_r.y = 0;
+        device.Fill(img_final, fill_r, fill_c);
+      }
+      image next_img;
+      next_img.pos_data = img_final.pos_data;
+      for(unsigned layer = 1; layer < opencl_img->LayerCount(); layer++)
+      {
+        if(opencl_img->GetVisability(layer))
+        {
+          next_img.rgb_data = opencl_img->GetRGBChannel(layer);
+          next_img.alpha_data = opencl_img->GetAlphaChannel(layer);
+          device.Blend(img_final, next_img);
+        }
+      }
+      render.SaveFile(dlg.GetPath());
+    }
   }
 }
 void AccelerPaint::LayerChecked(wxCommandEvent& event)
