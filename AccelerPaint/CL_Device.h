@@ -32,6 +32,7 @@ typedef struct image
   rect pos_data;
   unsigned char* rgb_data;
   unsigned char* alpha_data;
+  float opacity;
 } image;
 
 class OpenCL_Dev {

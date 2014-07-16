@@ -174,6 +174,7 @@ void Accel_ImagePanel::LoadFile(int width, int height, unsigned char* data, unsi
   Layer new_lay;
   new_lay.Image = new wxImage(width, height, data, alpha);
   new_lay.Enabled = true;
+  new_lay.Opacity = 1.0f;
   Layers.push_back(new_lay);
   
   //If it's not a new layer then update the canvas size and position.
@@ -193,6 +194,10 @@ void Accel_ImagePanel::CheckVisability(int index, bool state)
 {
   Layers[index].Enabled = state;
 }
+void Accel_ImagePanel::SetOpacity(int index, float opacity)
+{
+  Layers[index].Opacity = opacity;
+}
 unsigned char* Accel_ImagePanel::GetRGBChannel(unsigned layer)
 {
   return Layers[layer].Image->GetData();
@@ -204,6 +209,10 @@ unsigned char* Accel_ImagePanel::GetAlphaChannel(unsigned layer)
 bool Accel_ImagePanel::GetVisability(unsigned layer)
 {
   return Layers[layer].Enabled;
+}
+float Accel_ImagePanel::GetOpacity(unsigned layer)
+{
+  return Layers[layer].Opacity;
 }
 unsigned Accel_ImagePanel::GetCanvasWidth()
 {

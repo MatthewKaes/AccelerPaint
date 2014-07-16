@@ -228,12 +228,17 @@ void AccelerPaint::OpenFile(wxCommandEvent& event)
         unsigned char* alpha = new unsigned char[datagram.i_height * datagram.i_width];
         Layer_Data discriptor;
         input_stream.ReadAll(&discriptor, sizeof(discriptor));
+        char name[200];
+        int layer_size;
+        input_stream.ReadAll(&layer_size, sizeof(layer_size));
+        input_stream.ReadAll(name, layer_size);
+        name[layer_size] = 0;
         input_stream.ReadAll(data, datagram.i_height * datagram.i_width * COLOR_DEPTH);
         input_stream.ReadAll(alpha, datagram.i_height * datagram.i_width);
         opencl_img->LoadFile(datagram.i_width, datagram.i_height, data, alpha, layer != 0);
         opencl_img->CheckVisability(layer, discriptor.visible);
         
-        layersinfo->Insert(dlg.GetFilename(), layersinfo->GetCount());
+        layersinfo->Insert(name, layersinfo->GetCount());
         if(discriptor.visible)
           layersinfo->Check(layersinfo->GetCount() - 1);
       }
@@ -303,6 +308,10 @@ void AccelerPaint::SaveRender(wxCommandEvent& event)
         discriptor.opacity = 1.0f;
         discriptor.visible = opencl_img->GetVisability(layer);
         output_stream.WriteAll(&discriptor, sizeof(discriptor));
+        wxString name = layersinfo->GetString(layer);
+        int layer_size = name.size();
+        output_stream.WriteAll(&layer_size, sizeof(layer_size));
+        output_stream.WriteAll(name.c_str(), layer_size);
         output_stream.WriteAll(opencl_img->GetRGBChannel(layer), datagram.i_height * datagram.i_width * COLOR_DEPTH);
         output_stream.WriteAll(opencl_img->GetAlphaChannel(layer), datagram.i_height * datagram.i_width);
       }
