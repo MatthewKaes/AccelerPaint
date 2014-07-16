@@ -233,9 +233,9 @@ void AccelerPaint::OpenFile(wxCommandEvent& event)
         opencl_img->LoadFile(datagram.i_width, datagram.i_height, data, alpha, layer != 0);
         opencl_img->CheckVisability(layer, discriptor.visible);
         
-        layersinfo->Insert(dlg.GetFilename(), 0);
+        layersinfo->Insert(dlg.GetFilename(), layersinfo->GetCount());
         if(discriptor.visible)
-          layersinfo->Check(-1);
+          layersinfo->Check(layersinfo->GetCount() - 1);
       }
     }
     //load everything else
@@ -245,8 +245,8 @@ void AccelerPaint::OpenFile(wxCommandEvent& event)
       opencl_img->Refresh();
 
       layersinfo->Clear();
-      layersinfo->Insert(dlg.GetFilename(), 0);
-      layersinfo->Check(0);
+      layersinfo->Insert(dlg.GetFilename(), layersinfo->GetCount());
+      layersinfo->Check(layersinfo->GetCount() - 1);
     }
   }
 }
