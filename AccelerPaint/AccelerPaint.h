@@ -10,6 +10,7 @@
 #include <wx/frame.h>
 #include <wx/checklst.h>
 #include <wx/colordlg.h>
+#include <wx/spinctrl.h>
 
 #include <wx/image.h>
 #include "Accel_ImagePanel.h"
@@ -68,10 +69,12 @@ class AccelerPaint : public wxFrame
     void OpenLayer(wxCommandEvent& event);
     void SaveRender(wxCommandEvent& event);
     void LayerChecked(wxCommandEvent& event);
+    void LayerChanged(wxCommandEvent& event);
     void ImageBackground(wxPaintEvent& event);
     void ImageScroll(wxScrollEvent& event);
     void ColorPicker(wxCommandEvent& event);
     void ToolSelected(wxCommandEvent& event);
+    void OpacityChanged(wxSpinEvent& event);
 
     void Toolsupdate(int tool);
 
@@ -80,6 +83,7 @@ class AccelerPaint : public wxFrame
     wxPanel* imagepanel;
     wxScrollBar* imagesizeh;
     wxScrollBar* imagesizev;
+    wxSpinCtrl* opacityctrl;
     wxMenuBar* menustrip;
     wxMenu* filemenu;
     wxCheckListBox* layersinfo;

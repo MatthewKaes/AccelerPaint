@@ -65,8 +65,10 @@ void Accel_ImagePanel::RenderImage()
     {
       next_img.rgb_data = GetRGBChannel(layer);
       next_img.alpha_data = GetAlphaChannel(layer);
+      next_img.opacity = GetOpacity(layer);
       device.Blend(img_final, next_img);
     }
+
   }
 }
 void Accel_ImagePanel::Update(wxPaintEvent& event)

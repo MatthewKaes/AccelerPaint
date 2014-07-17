@@ -95,6 +95,7 @@
   <ItemGroup>
     <None Include="shaders\Blend.cl" />
     <None Include="shaders\Fill.cl" />
+    <None Include="shaders\Opacity.cl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

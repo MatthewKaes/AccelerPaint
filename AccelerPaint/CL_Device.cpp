@@ -58,6 +58,7 @@ void OpenCL_Dev::Init()
 {
   Build_Kernel("Fill");
   Build_Kernel("Blend");
+  Build_Kernel("Opacity");
 }
 void OpenCL_Dev::Build_Kernel(const char* name)
 {
@@ -202,8 +203,19 @@ bool OpenCL_Dev::Blend(image img_base, image img_forground)
   }
   cl::NDRange local(local_size, local_size);
   ;
+
+  //Preform the Alpha pass for the blending layer
+  cl::Kernel* kern = kernels["Opacity"];
+  kern->setArg(0, Alpha_Chan2);
+  kern->setArg(1, img_forground.pos_data.width);
+  kern->setArg(2, img_forground.opacity);
+
+  //enqueue the Range to run the kernal, also wait for our write buffers to 
+  //be enqueued if they aren't done yet
+  queue_.enqueueNDRangeKernel(*kern, cl::NullRange, global, local, &Events);
+
   //Set it as an argument
-  cl::Kernel* kern = kernels["Blend"];
+  kern = kernels["Blend"];
   kern->setArg(0, RGB_Chan);
   kern->setArg(1, Alpha_Chan);
   kern->setArg(2, img_base.pos_data.width);

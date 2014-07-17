@@ -6,7 +6,7 @@
 #include <wx/intl.h>
 #include <wx/string.h>
 #include <wx/wfstream.h>
- #include <sstream>
+#include <sstream>
 
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
@@ -91,11 +91,17 @@ void AccelerPaint::Create_GUI_Layers(wxWindow* parent, wxWindowID id)
 {
   //Construct Layers
   layerframe = new wxPanel(this, wxNewId(), wxPoint(0,0), wxSize(LAYERFRAME_WIDTH + 7,LAYERFRAME_HEIGHT + 7), wxRAISED_BORDER);
-  layersinfo = new wxCheckListBox(layerframe, ID_Layer);
-  layersinfo->SetSize(LAYERFRAME_WIDTH,LAYERFRAME_HEIGHT);
+  layersinfo = new wxCheckListBox(layerframe, ID_Layer, wxPoint(0,26), wxSize(LAYERFRAME_WIDTH, LAYERFRAME_HEIGHT - 24));
+  
+  //Construct Layer Controls
+  int ID_Spinctrl = wxNewId();
+  new wxStaticText(layerframe, wxNewId(), "Opacity", wxPoint(0,4));
+  opacityctrl = new wxSpinCtrl(layerframe, ID_Spinctrl, "100", wxPoint(50,1), wxSize(85, 22));
 
   //Connect Events for the layer checking
   Connect(ID_Layer, wxEVT_CHECKLISTBOX,(wxObjectEventFunction)&AccelerPaint::LayerChecked);
+  Connect(ID_Layer, wxEVT_LISTBOX,(wxObjectEventFunction)&AccelerPaint::LayerChanged);
+  Connect(ID_Spinctrl, wxEVT_SPINCTRL,(wxObjectEventFunction)&AccelerPaint::OpacityChanged);
 
 }
 void AccelerPaint::Create_GUI_ImagePanel(wxWindow* parent, wxWindowID id)
@@ -228,6 +234,7 @@ void AccelerPaint::OpenFile(wxCommandEvent& event)
         input_stream.ReadAll(alpha, datagram.i_height * datagram.i_width);
         opencl_img->LoadFile(datagram.i_width, datagram.i_height, data, alpha, layer != 0);
         opencl_img->CheckVisability(layer, discriptor.visible);
+        opencl_img->SetOpacity(layer, discriptor.opacity);
         
         layersinfo->Insert(name, layersinfo->GetCount());
         if(discriptor.visible)
@@ -296,7 +303,7 @@ void AccelerPaint::SaveRender(wxCommandEvent& event)
       for(unsigned layer = 0; layer < opencl_img->LayerCount(); layer++)
       {
         Layer_Data discriptor;
-        discriptor.opacity = 1.0f;
+        discriptor.opacity = opencl_img->GetOpacity(layer);
         discriptor.visible = opencl_img->GetVisability(layer);
         output_stream.WriteAll(&discriptor, sizeof(discriptor));
         wxString name = layersinfo->GetString(layer);
@@ -310,7 +317,7 @@ void AccelerPaint::SaveRender(wxCommandEvent& event)
     //Rendering an actual image
     else
     {
-      wxImage render(opencl_img->GetLayers()->at(0).Image->Copy());
+      wxImage render(*opencl_img->GetRender());
 
       render.SaveFile(dlg.GetPath());
     }
@@ -320,6 +327,10 @@ void AccelerPaint::LayerChecked(wxCommandEvent& event)
 {
   opencl_img->CheckVisability(event.GetInt(), layersinfo->IsChecked(event.GetInt()));
   opencl_img->Refresh();
+}
+void AccelerPaint::LayerChanged(wxCommandEvent& event)
+{
+  opacityctrl->SetValue(floor(opencl_img->GetOpacity(event.GetInt()) * 100 + 0.5));
 }
 void AccelerPaint::ImageBackground(wxPaintEvent& event)
 {
@@ -355,6 +366,19 @@ void AccelerPaint::ToolSelected(wxCommandEvent& event)
       return;
     }
   }
+}
+void AccelerPaint::OpacityChanged(wxSpinEvent& event)
+{
+  if(!layersinfo->GetCount())
+    return;
+
+  float opacity = event.GetInt() / 100.0f;
+  int index = layersinfo->GetSelection();
+  if(index == wxNOT_FOUND)
+    index = 0;
+
+  opencl_img->SetOpacity(index, opacity);
+  opencl_img->Refresh();
 }
 void AccelerPaint::Toolsupdate(int tool)
 {
