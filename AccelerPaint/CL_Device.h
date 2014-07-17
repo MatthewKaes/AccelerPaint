@@ -1,13 +1,16 @@
 #define __NO_STD_VECTOR // Use cl::vector instead of STL version
 #define __CL_ENABLE_EXCEPTIONS
 
+#pragma warning(push)
+#pragma warning(disable : 4290)
 #ifdef __APPLE__
     #include "OpenCL/opencl.h"
 #else
     #include "CL/cl.hpp"
 #endif
-#include <unordered_map>
+#pragma warning(pop)
 
+#include <unordered_map>
 
 
 //Structs used to talk to the GPU
@@ -39,6 +42,7 @@ class OpenCL_Dev {
 
 public:
   OpenCL_Dev();
+  void Init();
   void Build_Kernel(const char* name);
   bool Fill(image img_data, rect fill_region, color fill_color);
   bool Blend(image img_base, image img_forground);

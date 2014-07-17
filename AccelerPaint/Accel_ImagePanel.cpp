@@ -9,6 +9,7 @@ Accel_ImagePanel::Accel_ImagePanel(wxWindow* parent, wxScrollBar* hscroll, wxScr
   hscroll_ = hscroll;
   vscroll_ = vscroll;
   scroll_size = hscroll->GetSize().GetHeight();
+  need_paint = FULL_REPAINT;
 
   Create(parent, 0, 0,  parent->GetSize().GetX() - scroll_size, parent->GetSize().GetY() - scroll_size);
 }
@@ -36,7 +37,37 @@ void Accel_ImagePanel::Remove()
 }
 void Accel_ImagePanel::Refresh()
 {
+  need_paint = FULL_REPAINT;
   ImagePanel->Refresh();
+}
+void Accel_ImagePanel::RenderImage()
+{      
+  image img_final;
+  img_final.rgb_data = Render.GetData();
+  img_final.alpha_data = Render.GetAlpha();
+  img_final.pos_data.width = Render.GetSize().GetWidth();
+  img_final.pos_data.height = Render.GetSize().GetHeight();
+    
+  color fill_c;
+  fill_c.Alpha = fill_c.Blue = fill_c.Green = fill_c.Red = 0;
+  rect fill_r;
+  fill_r.width = Render.GetSize().GetWidth();
+  fill_r.height = Render.GetSize().GetHeight();
+  fill_r.x = fill_r.y = 0;
+
+  device.Fill(img_final, fill_r, fill_c);
+
+  image next_img;
+  next_img.pos_data = img_final.pos_data;
+  for(unsigned layer = 0; layer < LayerCount(); layer++)
+  {
+    if(GetVisability(layer))
+    {
+      next_img.rgb_data = GetRGBChannel(layer);
+      next_img.alpha_data = GetAlphaChannel(layer);
+      device.Blend(img_final, next_img);
+    }
+  }
 }
 void Accel_ImagePanel::Update(wxPaintEvent& event)
 {
@@ -94,9 +125,15 @@ void Accel_ImagePanel::Update(wxPaintEvent& event)
     for(int y = 0; y < ImagePanel->GetSize().GetHeight(); y += 128)
       for(int x = 0; x < ImagePanel->GetSize().GetWidth(); x += 128)
         dc.DrawBitmap(Background,x,y, true);
-    for(unsigned layer = 0; layer < Layers.size(); layer++)
-      if(Layers[layer].Enabled)
-        dc.DrawBitmap(*Layers[layer].Image, -x_off, -y_off, true);
+    //for(unsigned layer = 0; layer < Layers.size(); layer++)
+    //  if(Layers[layer].Enabled)
+    //    dc.DrawBitmap(*Layers[layer].Image, -x_off, -y_off, true);
+    if(need_paint == FULL_REPAINT)
+    {
+      need_paint = NO_REPAINT;
+      RenderImage();
+    }
+    dc.DrawBitmap(Render, -x_off, -y_off, true);
   }
 }
 void Accel_ImagePanel::LoadFile(const wxString& name, bool new_layer)
@@ -104,6 +141,9 @@ void Accel_ImagePanel::LoadFile(const wxString& name, bool new_layer)
   //Update Fix:
   //quites iCCP warning for PNG files. Temporary fix that quites ALL warnings.
   wxLogNull Nolog;
+
+  //Loading a file is going to require a repaint.
+  need_paint = FULL_REPAINT;
 
   //Load the image into the layer it belongs.
   //If it's not a new layer then wipe the layers
@@ -140,9 +180,13 @@ void Accel_ImagePanel::LoadFile(const wxString& name, bool new_layer)
     img_width = ImagePtr->GetWidth();
     img_height = ImagePtr->GetHeight();
 
+    //Resize image panel using this as our base canvas now.
     ImagePanel->SetSize(img_width, img_height);
     ImagePanel->SetPosition(wxPoint((parent_->GetSize().GetWidth() - img_width - scroll_size) / 2, 
                             (parent_->GetSize().GetHeight() - img_height - scroll_size) / 2));
+
+    //Reset the render target
+    Render = ImagePtr->Copy();
   }
   //Resize to the canvas if it is a new layer
   else
@@ -158,6 +202,9 @@ void Accel_ImagePanel::LoadFile(int width, int height, unsigned char* data, unsi
   //Update Fix:
   //quites iCCP warning for PNG files. Temporary fix that quites ALL warnings.
   wxLogNull Nolog;
+
+  //Loading a file is going to require a repaint.
+  need_paint = FULL_REPAINT;
 
   //Load the image into the layer it belongs.
   //If it's not a new layer then wipe the layers
@@ -184,10 +231,14 @@ void Accel_ImagePanel::LoadFile(int width, int height, unsigned char* data, unsi
 
     img_width = ImagePtr->GetWidth();
     img_height = ImagePtr->GetHeight();
-
+    
+    //Resize image panel using this as our base canvas now.
     ImagePanel->SetSize(img_width, img_height);
     ImagePanel->SetPosition(wxPoint((parent_->GetSize().GetWidth() - img_width - scroll_size) / 2, 
                             (parent_->GetSize().GetHeight() - img_height - scroll_size) / 2));
+
+    //Reset the render target
+    Render = ImagePtr->Copy();
   }
 }
 void Accel_ImagePanel::CheckVisability(int index, bool state)
@@ -221,6 +272,10 @@ unsigned Accel_ImagePanel::GetCanvasWidth()
 unsigned Accel_ImagePanel::GetCanvasHeight()
 {
   return img_height;
+} 
+wxImage* Accel_ImagePanel::GetRender()
+{
+  return &Render;
 }
 
 unsigned Accel_ImagePanel::LayerCount()

@@ -21,7 +21,7 @@ __kernel void Blend(__global unsigned char* RGB_BACK, __global unsigned char* AL
 	{
 		unsigned char bc = RGB_BACK[(y * WIDTH_IN + x) * 3 + i];
 		unsigned char fc = RGB_FOR[(y * WIDTH_IN + x) * 3 + i];
-		RGB_BACK[(y * WIDTH_IN + x) * 3 + i] = fc * (fa / 255.0f) + bc * (ba / 255.0f) * ((255.0f - fa) / 255.0f);
+		RGB_BACK[(y * WIDTH_IN + x) * 3 + i] = fc * fa / 255.0f + bc * (255.0f - fa) / 255.0f;
 	}
 	ALPHA_BACK[y * WIDTH_IN + x] = fa + ba* ((255.0f - fa) / 255.0f);
 }

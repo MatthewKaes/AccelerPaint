@@ -1,7 +1,10 @@
 #ifndef ACCEL_IMAGE_PANEL
 #define ACCEL_IMAGE_PANEL
 
+#pragma warning(disable : 4996)
+#include "CL_Device.h"
 #include "wx\wx.h"
+
 #include <vector>
 
 struct Layer
@@ -20,6 +23,7 @@ public:
   void Update(wxPaintEvent& event);
   void Remove();
   void Refresh();
+  void RenderImage();
   void LoadFile(const wxString& name, bool new_layer = false);
   void LoadFile(int width, int height, unsigned char* data, unsigned char* alpha, bool new_layer = false);
   void CheckVisability(int index, bool state);
@@ -31,20 +35,26 @@ public:
   float GetOpacity(unsigned layer);
   unsigned GetCanvasWidth();
   unsigned GetCanvasHeight();
+  wxImage* GetRender();
   unsigned LayerCount();
   std::vector<Layer>* GetLayers();
 
 private:
+  enum Repaint_States { NO_REPAINT, FULL_REPAINT };
+
   int id;
   long draw_id;
   int img_width, img_height;
   int scroll_size;
+  wxImage Render;
   wxWindow* parent_;
   wxScrollBar* hscroll_;
   wxScrollBar* vscroll_;
   wxImage Background;
   std::vector<Layer> Layers;
   wxPanel* ImagePanel;
+  OpenCL_Dev device;
+  Repaint_States need_paint;
 };
 
 #endif

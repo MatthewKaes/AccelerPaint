@@ -43,6 +43,8 @@ OpenCL_Dev::OpenCL_Dev()
     context_ = context;
     queue_ = cl::CommandQueue(context, devices_[0]);
     opencl_enabled = true;
+
+    Init();
   } 
   // Something horrible happend...
   catch(cl::Error error) 
@@ -51,6 +53,11 @@ OpenCL_Dev::OpenCL_Dev()
 		printf("A Error occured with loading OpenCL.\n");
     opencl_enabled = false;
   }
+}
+void OpenCL_Dev::Init()
+{
+  Build_Kernel("Fill");
+  Build_Kernel("Blend");
 }
 void OpenCL_Dev::Build_Kernel(const char* name)
 {

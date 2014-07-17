@@ -12,7 +12,6 @@
 #include <wx/colordlg.h>
 
 #include <wx/image.h>
-#include "CL_Device.h"
 #include "Accel_ImagePanel.h"
 #include <vector>
 #include <string>
@@ -56,8 +55,6 @@ class AccelerPaint : public wxFrame
 	    float opacity;
     } Layer_Data;
 
-
-    void Build_Opencl();
     void Create_GUI(wxWindow* parent, wxWindowID id);
     void Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id);
     void Create_GUI_Layers(wxWindow* parent, wxWindowID id);
@@ -77,7 +74,7 @@ class AccelerPaint : public wxFrame
     void ToolSelected(wxCommandEvent& event);
 
     void Toolsupdate(int tool);
-    
+
     wxPanel* layerframe;
     wxPanel* toolspanel;
     wxPanel* imagepanel;
@@ -92,7 +89,6 @@ class AccelerPaint : public wxFrame
 
     wxColour pickedcolor;
     Accel_ImagePanel* opencl_img;
-    OpenCL_Dev device;
     
     unsigned seperators;
     unsigned selected_tool;
