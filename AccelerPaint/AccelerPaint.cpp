@@ -67,9 +67,9 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
 {
   //Components
   wxMenuItem* menu_items;
+  menustrip = new wxMenuBar();
 
   //Construct File Menu
-  menustrip = new wxMenuBar();
   filemenu = new wxMenu();
   menu_items = new wxMenuItem(filemenu, ID_OpenItem, _("Open"), wxEmptyString, wxITEM_NORMAL);
   filemenu->Append(menu_items);
@@ -78,6 +78,13 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
   menu_items = new wxMenuItem(filemenu, ID_SaveItem, _("Save"), wxEmptyString, wxITEM_NORMAL);
   filemenu->Append(menu_items);
   menustrip->Append(filemenu, _("File"));
+
+  //Construct Filter Menu
+  filemenu = new wxMenu();
+  int ID_Blur = wxNewId();
+  menu_items = new wxMenuItem(filemenu, ID_Blur, _("Blur"), wxEmptyString, wxITEM_NORMAL);
+  filemenu->Append(menu_items);
+  menustrip->Append(filemenu, _("Filter"));
   
   //Set the Menu bar
   SetMenuBar(menustrip);
@@ -86,6 +93,11 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
   Connect(ID_OpenItem, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::OpenFile);
   Connect(ID_OpenLItem, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::OpenLayer);
   Connect(ID_SaveItem, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::SaveRender);
+
+  //Filters
+  Connect(ID_Blur, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::BlurLayer);
+
+
 }
 void AccelerPaint::Create_GUI_Layers(wxWindow* parent, wxWindowID id)
 {
@@ -378,6 +390,18 @@ void AccelerPaint::OpacityChanged(wxSpinEvent& event)
     index = 0;
 
   opencl_img->SetOpacity(index, opacity);
+  opencl_img->Refresh();
+}
+void AccelerPaint::BlurLayer(wxCommandEvent& event)
+{
+  if(!layersinfo->GetCount())
+    return;
+
+  int index = layersinfo->GetSelection();
+  if(index == wxNOT_FOUND)
+    index = 0;
+
+  opencl_img->Blur(index);
   opencl_img->Refresh();
 }
 void AccelerPaint::Toolsupdate(int tool)

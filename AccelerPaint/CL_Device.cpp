@@ -59,6 +59,7 @@ void OpenCL_Dev::Init()
   Build_Kernel("Fill");
   Build_Kernel("Blend");
   Build_Kernel("Opacity");
+  Build_Kernel("Blur");
 }
 void OpenCL_Dev::Build_Kernel(const char* name)
 {
@@ -221,6 +222,65 @@ bool OpenCL_Dev::Blend(image img_base, image img_forground)
   kern->setArg(2, img_base.pos_data.width);
   kern->setArg(3, RGB_Chan2);
   kern->setArg(4, Alpha_Chan2);
+
+  //enqueue the Range to run the kernal, also wait for our write buffers to 
+  //be enqueued if they aren't done yet
+  queue_.enqueueNDRangeKernel(*kern, cl::NullRange, global, local, &Events);
+  
+  queue_.enqueueReadBuffer(Alpha_Chan, CL_TRUE, 0, pixel_count, img_base.alpha_data);
+  queue_.enqueueReadBuffer(RGB_Chan, CL_TRUE, 0, pixel_count * 3, img_base.rgb_data);
+
+  return true;
+}
+bool OpenCL_Dev::Blur(image img_base)
+{
+  if(!opencl_enabled)
+    return false;
+
+  //Channel Buffers
+  unsigned pixel_count = img_base.pos_data.width * img_base.pos_data.height;
+  cl::Buffer RGB_Chan = cl::Buffer(context_, CL_MEM_READ_WRITE, pixel_count * 3);
+  cl::Buffer RGB_Chan2 = cl::Buffer(context_, CL_MEM_READ_WRITE, pixel_count * 3);
+  cl::Buffer Alpha_Chan = cl::Buffer(context_, CL_MEM_READ_WRITE, pixel_count * 3);
+  cl::Buffer Alpha_Chan2 = cl::Buffer(context_, CL_MEM_READ_WRITE, pixel_count * 3);
+  
+  //Don't block for our events.
+  //Run other code while we wait for them to enqueue we will block
+  //on them later when enqueueing the kernel range.
+  cl::vector< cl::Event > Events;
+  cl::Event new_event;
+  queue_.enqueueWriteBuffer(RGB_Chan, CL_FALSE, 0, pixel_count * 3, img_base.rgb_data, NULL, &new_event);
+  Events.push_back(new_event);
+  queue_.enqueueWriteBuffer(Alpha_Chan, CL_FALSE, 0, pixel_count, img_base.alpha_data, NULL, &new_event);
+  Events.push_back(new_event);
+  queue_.enqueueWriteBuffer(RGB_Chan2, CL_FALSE, 0, pixel_count * 3, img_base.rgb_data, NULL, &new_event);
+  Events.push_back(new_event);
+  queue_.enqueueWriteBuffer(Alpha_Chan2, CL_FALSE, 0, pixel_count, img_base.alpha_data, NULL, &new_event);
+  Events.push_back(new_event);
+
+  //Number of threads to run.
+  cl::NDRange global(img_base.pos_data.width, img_base.pos_data.height);
+
+  //Try to find a better work size then 1.
+  //Sizes 128 and 64 are optimum
+  int local_size = 32;
+  while(local_size > 1)
+  {
+    if(img_base.pos_data.width % local_size == 0 && 
+      img_base.pos_data.height % local_size == 0)
+      break;
+
+    local_size /= 2;
+  }
+  cl::NDRange local(local_size, local_size);
+
+  //Preform the Alpha pass for the blending layer
+  cl::Kernel* kern = kernels["Blur"];
+  kern->setArg(0, RGB_Chan);
+  kern->setArg(1, Alpha_Chan);
+  kern->setArg(2, RGB_Chan2);
+  kern->setArg(3, Alpha_Chan2);
+  kern->setArg(4, img_base.pos_data.width);
 
   //enqueue the Range to run the kernal, also wait for our write buffers to 
   //be enqueued if they aren't done yet

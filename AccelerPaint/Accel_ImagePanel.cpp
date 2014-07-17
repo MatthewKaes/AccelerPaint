@@ -163,6 +163,7 @@ void Accel_ImagePanel::LoadFile(const wxString& name, bool new_layer)
     Layer new_lay;
     new_lay.Image = new wxImage();
     new_lay.Enabled = true;
+    new_lay.Opacity = 1.0f;
     Layers.push_back(new_lay);
   }
   Layers[Layers.size() - 1].Enabled = true;
@@ -242,6 +243,20 @@ void Accel_ImagePanel::LoadFile(int width, int height, unsigned char* data, unsi
     //Reset the render target
     Render = ImagePtr->Copy();
   }
+}
+void Accel_ImagePanel::Blur(unsigned layer)
+{
+  need_paint = FULL_REPAINT;
+
+  image img;
+  img.rgb_data = Layers[layer].Image->GetData();
+  img.alpha_data = Layers[layer].Image->GetAlpha();
+  img.pos_data.width = Layers[layer].Image->GetSize().GetWidth();
+  img.pos_data.height = Layers[layer].Image->GetSize().GetHeight();
+
+  device.Blur(img);
+
+  Refresh();
 }
 void Accel_ImagePanel::CheckVisability(int index, bool state)
 {

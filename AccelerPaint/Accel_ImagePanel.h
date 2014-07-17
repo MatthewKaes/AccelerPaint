@@ -26,9 +26,16 @@ public:
   void RenderImage();
   void LoadFile(const wxString& name, bool new_layer = false);
   void LoadFile(int width, int height, unsigned char* data, unsigned char* alpha, bool new_layer = false);
+
+  //Filters
+  void Blur(unsigned layer);
+
+  //Setters
   void CheckVisability(int index, bool state);
   void SetOpacity(int index, float opacity);
-  void Empty();
+
+  //Getters
+  unsigned LayerCount();
   unsigned char* GetRGBChannel(unsigned layer);
   unsigned char* GetAlphaChannel(unsigned layer);
   bool GetVisability(unsigned layer);
@@ -36,8 +43,8 @@ public:
   unsigned GetCanvasWidth();
   unsigned GetCanvasHeight();
   wxImage* GetRender();
-  unsigned LayerCount();
   std::vector<Layer>* GetLayers();
+  void Empty();
 
 private:
   enum Repaint_States { NO_REPAINT, FULL_REPAINT };

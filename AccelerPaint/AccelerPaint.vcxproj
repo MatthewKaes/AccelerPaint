@@ -94,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\Blend.cl" />
+    <None Include="shaders\Blur.cl" />
     <None Include="shaders\Fill.cl" />
     <None Include="shaders\Opacity.cl" />
   </ItemGroup>

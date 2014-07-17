@@ -46,6 +46,7 @@ public:
   void Build_Kernel(const char* name);
   bool Fill(image img_data, rect fill_region, color fill_color);
   bool Blend(image img_base, image img_forground);
+  bool Blur(image img_base);
 
 private:
   cl::vector<cl::Platform> platforms_;
