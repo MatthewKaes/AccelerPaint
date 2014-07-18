@@ -244,6 +244,19 @@ void Accel_ImagePanel::LoadFile(int width, int height, unsigned char* data, unsi
     Render = ImagePtr->Copy();
   }
 }
+void Accel_ImagePanel::Invert(unsigned layer)
+{
+  need_paint = FULL_REPAINT;
+
+  image img;
+  img.rgb_data = Layers[layer].Image->GetData();
+  img.pos_data.width = Layers[layer].Image->GetSize().GetWidth();
+  img.pos_data.height = Layers[layer].Image->GetSize().GetHeight();
+
+  device.Invert(img);
+
+  Refresh();
+}
 void Accel_ImagePanel::Blur(unsigned layer)
 {
   need_paint = FULL_REPAINT;

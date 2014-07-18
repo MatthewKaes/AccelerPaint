@@ -28,6 +28,7 @@ public:
   void LoadFile(int width, int height, unsigned char* data, unsigned char* alpha, bool new_layer = false);
 
   //Filters
+  void Invert(unsigned layer);
   void Blur(unsigned layer);
 
   //Setters

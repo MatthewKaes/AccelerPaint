@@ -71,20 +71,33 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
 
   //Construct File Menu
   filemenu = new wxMenu();
-  menu_items = new wxMenuItem(filemenu, ID_OpenItem, _("Open"), wxEmptyString, wxITEM_NORMAL);
+  menu_items = new wxMenuItem(filemenu, ID_OpenItem, _("&Open"), wxEmptyString, wxITEM_NORMAL);
   filemenu->Append(menu_items);
-  menu_items = new wxMenuItem(filemenu, ID_OpenLItem, _("Open Layer"), wxEmptyString, wxITEM_NORMAL);
+  menu_items = new wxMenuItem(filemenu, ID_OpenLItem, _("Open &Layer"), wxEmptyString, wxITEM_NORMAL);
   filemenu->Append(menu_items);
-  menu_items = new wxMenuItem(filemenu, ID_SaveItem, _("Save"), wxEmptyString, wxITEM_NORMAL);
+  menu_items = new wxMenuItem(filemenu, ID_SaveItem, _("&Save"), wxEmptyString, wxITEM_NORMAL);
   filemenu->Append(menu_items);
-  menustrip->Append(filemenu, _("File"));
-
+  menustrip->Append(filemenu, _("&File"));
+  
+  //Construct Edit Menu
+  filemenu = new wxMenu();
+  int ID_Canvas = wxNewId();
+  menu_items = new wxMenuItem(filemenu, ID_Canvas, _("&Canvas Size"), wxEmptyString, wxITEM_NORMAL);
+  filemenu->Append(menu_items);
+  int ID_Resize = wxNewId();
+  menu_items = new wxMenuItem(filemenu, ID_Resize, _("&Resize Image"), wxEmptyString, wxITEM_NORMAL);
+  filemenu->Append(menu_items);
+  menustrip->Append(filemenu, _("&Edit"));
+  
   //Construct Filter Menu
   filemenu = new wxMenu();
-  int ID_Blur = wxNewId();
-  menu_items = new wxMenuItem(filemenu, ID_Blur, _("Blur"), wxEmptyString, wxITEM_NORMAL);
+  int ID_Invert = wxNewId();
+  menu_items = new wxMenuItem(filemenu, ID_Invert, _("&Invert"), wxEmptyString, wxITEM_NORMAL);
   filemenu->Append(menu_items);
-  menustrip->Append(filemenu, _("Filter"));
+  int ID_Blur = wxNewId();
+  menu_items = new wxMenuItem(filemenu, ID_Blur, _("&Blur"), wxEmptyString, wxITEM_NORMAL);
+  filemenu->Append(menu_items);
+  menustrip->Append(filemenu, _("F&ilter"));
   
   //Set the Menu bar
   SetMenuBar(menustrip);
@@ -95,6 +108,7 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
   Connect(ID_SaveItem, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::SaveRender);
 
   //Filters
+  Connect(ID_Invert, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::InvertLayer);
   Connect(ID_Blur, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::BlurLayer);
 
 
@@ -390,6 +404,18 @@ void AccelerPaint::OpacityChanged(wxSpinEvent& event)
     index = 0;
 
   opencl_img->SetOpacity(index, opacity);
+  opencl_img->Refresh();
+}
+void AccelerPaint::InvertLayer(wxCommandEvent& event)
+{
+  if(!layersinfo->GetCount())
+    return;
+
+  int index = layersinfo->GetSelection();
+  if(index == wxNOT_FOUND)
+    index = 0;
+
+  opencl_img->Invert(index);
   opencl_img->Refresh();
 }
 void AccelerPaint::BlurLayer(wxCommandEvent& event)
