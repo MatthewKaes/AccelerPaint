@@ -246,28 +246,13 @@ void Accel_ImagePanel::LoadFile(int width, int height, unsigned char* data, unsi
 }
 void Accel_ImagePanel::Invert(unsigned layer)
 {
-  need_paint = FULL_REPAINT;
-
-  image img;
-  img.rgb_data = Layers[layer].Image->GetData();
-  img.pos_data.width = Layers[layer].Image->GetSize().GetWidth();
-  img.pos_data.height = Layers[layer].Image->GetSize().GetHeight();
-
-  device.Invert(img);
+  device.Invert(ImageData(layer));
 
   Refresh();
 }
 void Accel_ImagePanel::Blur(unsigned layer)
 {
-  need_paint = FULL_REPAINT;
-
-  image img;
-  img.rgb_data = Layers[layer].Image->GetData();
-  img.alpha_data = Layers[layer].Image->GetAlpha();
-  img.pos_data.width = Layers[layer].Image->GetSize().GetWidth();
-  img.pos_data.height = Layers[layer].Image->GetSize().GetHeight();
-
-  device.Blur(img);
+  device.Blur(ImageData(layer));
 
   Refresh();
 }
@@ -315,4 +300,16 @@ unsigned Accel_ImagePanel::LayerCount()
 std::vector<Layer>* Accel_ImagePanel::GetLayers()
 {
   return &Layers;
+}
+image Accel_ImagePanel::ImageData(unsigned layer)
+{
+  need_paint = FULL_REPAINT;
+
+  image img;
+  img.rgb_data = Layers[layer].Image->GetData();
+  img.alpha_data = Layers[layer].Image->GetAlpha();
+  img.pos_data.width = Layers[layer].Image->GetSize().GetWidth();
+  img.pos_data.height = Layers[layer].Image->GetSize().GetHeight();
+
+  return img;
 }

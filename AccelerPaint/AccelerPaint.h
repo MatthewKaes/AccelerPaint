@@ -79,6 +79,7 @@ class AccelerPaint : public wxFrame
     void BlurLayer(wxCommandEvent& event);
 
     void Toolsupdate(int tool);
+    int LayerSelected();
 
     wxPanel* layerframe;
     wxPanel* toolspanel;

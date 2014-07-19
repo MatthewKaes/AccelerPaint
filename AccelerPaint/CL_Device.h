@@ -50,6 +50,8 @@ public:
   bool Blur(image img_base);
 
 private:
+  cl::NDRange Work_Group(image& img_data);
+
   cl::vector<cl::Platform> platforms_;
   cl::Context context_;
   cl::vector<cl::Device> devices_;

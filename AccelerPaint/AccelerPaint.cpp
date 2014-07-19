@@ -395,37 +395,29 @@ void AccelerPaint::ToolSelected(wxCommandEvent& event)
 }
 void AccelerPaint::OpacityChanged(wxSpinEvent& event)
 {
-  if(!layersinfo->GetCount())
+  int index = LayerSelected();
+  if(index == wxNOT_FOUND)
     return;
 
   float opacity = event.GetInt() / 100.0f;
-  int index = layersinfo->GetSelection();
-  if(index == wxNOT_FOUND)
-    index = 0;
 
   opencl_img->SetOpacity(index, opacity);
   opencl_img->Refresh();
 }
 void AccelerPaint::InvertLayer(wxCommandEvent& event)
 {
-  if(!layersinfo->GetCount())
-    return;
-
-  int index = layersinfo->GetSelection();
+  int index = LayerSelected();
   if(index == wxNOT_FOUND)
-    index = 0;
+    return;
 
   opencl_img->Invert(index);
   opencl_img->Refresh();
 }
 void AccelerPaint::BlurLayer(wxCommandEvent& event)
 {
-  if(!layersinfo->GetCount())
-    return;
-
-  int index = layersinfo->GetSelection();
+  int index = LayerSelected();
   if(index == wxNOT_FOUND)
-    index = 0;
+    return;
 
   opencl_img->Blur(index);
   opencl_img->Refresh();
@@ -440,4 +432,15 @@ void AccelerPaint::Toolsupdate(int tool)
       toolbuttons[i]->Enable(true);
   }
   selected_tool = tool;
+}
+int AccelerPaint::LayerSelected()
+{
+  if(!layersinfo->GetCount())
+    return wxNOT_FOUND;
+
+  int index = layersinfo->GetSelection();
+  if(index == wxNOT_FOUND)
+    return wxNOT_FOUND;
+
+  return index;
 }

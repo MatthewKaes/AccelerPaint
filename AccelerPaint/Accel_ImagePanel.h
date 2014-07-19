@@ -49,6 +49,8 @@ public:
 
 private:
   enum Repaint_States { NO_REPAINT, FULL_REPAINT };
+  
+  image ImageData(unsigned layer);
 
   int id;
   long draw_id;

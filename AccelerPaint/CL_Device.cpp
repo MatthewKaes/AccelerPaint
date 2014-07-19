@@ -135,18 +135,8 @@ bool OpenCL_Dev::Fill(image img_data, rect fill_region, color fill_color)
   //Number of threads to run.
   cl::NDRange global(img_data.pos_data.width, img_data.pos_data.height);
 
-  //Try to find a better work size then 1.
-  //Sizes 128 and 64 are optimum
-  int local_size = 32;
-  while(local_size > 1)
-  {
-    if(img_data.pos_data.width % local_size == 0 && 
-      img_data.pos_data.height % local_size == 0)
-      break;
-
-    local_size /= 2;
-  }
-  cl::NDRange local(local_size, local_size);
+  //Get work group size
+  cl::NDRange local = Work_Group(img_data);
 
   //Set it as an argument
   cl::Kernel* kern = kernels["Fill"];
@@ -192,19 +182,8 @@ bool OpenCL_Dev::Blend(image img_base, image img_forground)
   //Number of threads to run.
   cl::NDRange global(img_base.pos_data.width, img_forground.pos_data.height);
 
-  //Try to find a better work size then 1.
-  //Sizes 128 and 64 are optimum
-  int local_size = 32;
-  while(local_size > 1)
-  {
-    if(img_base.pos_data.width % local_size == 0 && 
-      img_base.pos_data.height % local_size == 0)
-      break;
-
-    local_size /= 2;
-  }
-  cl::NDRange local(local_size, local_size);
-  ;
+  //Get work group size
+  cl::NDRange local = Work_Group(img_base);
 
   //Preform the Alpha pass for the blending layer
   cl::Kernel* kern = kernels["Opacity"];
@@ -253,18 +232,8 @@ bool OpenCL_Dev::Invert(image img_base)
   //Number of threads to run.
   cl::NDRange global(img_base.pos_data.width, img_base.pos_data.height);
 
-  //Try to find a better work size then 1.
-  //Sizes 128 and 64 are optimum
-  int local_size = 32;
-  while(local_size > 1)
-  {
-    if(img_base.pos_data.width % local_size == 0 && 
-      img_base.pos_data.height % local_size == 0)
-      break;
-
-    local_size /= 2;
-  }
-  cl::NDRange local(local_size, local_size);
+  //Get work group size
+  cl::NDRange local = Work_Group(img_base);
 
   //Preform the Alpha pass for the blending layer
   cl::Kernel* kern = kernels["Inverter"];
@@ -307,19 +276,9 @@ bool OpenCL_Dev::Blur(image img_base)
 
   //Number of threads to run.
   cl::NDRange global(img_base.pos_data.width, img_base.pos_data.height);
-
-  //Try to find a better work size then 1.
-  //Sizes 128 and 64 are optimum
-  int local_size = 32;
-  while(local_size > 1)
-  {
-    if(img_base.pos_data.width % local_size == 0 && 
-      img_base.pos_data.height % local_size == 0)
-      break;
-
-    local_size /= 2;
-  }
-  cl::NDRange local(local_size, local_size);
+  
+  //Get work group size
+  cl::NDRange local = Work_Group(img_base);
 
   //Preform the Alpha pass for the blending layer
   cl::Kernel* kern = kernels["Blur"];
@@ -337,4 +296,19 @@ bool OpenCL_Dev::Blur(image img_base)
   queue_.enqueueReadBuffer(RGB_Chan, CL_TRUE, 0, pixel_count * 3, img_base.rgb_data);
 
   return true;
+}
+cl::NDRange OpenCL_Dev::Work_Group(image& img_data)
+{
+  //Try to find a better work size then 1.
+  //Sizes 128 and 64 are optimum
+  int local_size = 32;
+  while(local_size > 1)
+  {
+    if(img_data.pos_data.width % local_size == 0 && 
+      img_data.pos_data.height % local_size == 0)
+      break;
+
+    local_size /= 2;
+  }
+  return cl::NDRange(local_size, local_size);
 }
