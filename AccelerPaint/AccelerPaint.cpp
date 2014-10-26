@@ -17,6 +17,7 @@
 #endif
 
 
+unsigned AccelerPaint::FILL_ID = 0;
 const long AccelerPaint::ID_OpenItem = wxNewId();
 const long AccelerPaint::ID_OpenLItem = wxNewId();
 const long AccelerPaint::ID_SaveItem = wxNewId();
@@ -156,9 +157,9 @@ void AccelerPaint::Create_GUI_ImagePanel(wxWindow* parent, wxWindowID id)
 
   //Connect part events  
   imagepanel->Connect(wxEVT_PAINT,(wxObjectEventFunction)&AccelerPaint::ImageBackground);
+  opencl_img->ImagePanel->Connect(wxEVT_LEFT_UP,(wxObjectEventFunction)&AccelerPaint::ClickEvent);
   Connect(ID_HScroll, wxEVT_SCROLL_CHANGED,(wxObjectEventFunction)&AccelerPaint::ImageScroll);
   Connect(ID_VScroll, wxEVT_SCROLL_CHANGED,(wxObjectEventFunction)&AccelerPaint::ImageScroll);
-
 }
 void AccelerPaint::Create_GUI_Tools(wxWindow* parent, wxWindowID id)
 {
@@ -171,7 +172,8 @@ void AccelerPaint::Create_GUI_Tools(wxWindow* parent, wxWindowID id)
   Create_GUI_Tool_Generic(toolspanel, toolindex++, "./resources/select.png", "Selection Tool");
   Create_GUI_Tool_Sperator(toolspanel, toolindex);
   Create_GUI_Tool_Generic(toolspanel, toolindex++, "./resources/brush.png", "Brush Tool");
-  Create_GUI_Tool_Generic(toolspanel, toolindex++, "./resources/fill.png", "Fill Tool");
+  FILL_ID = toolindex++;
+  Create_GUI_Tool_Generic(toolspanel, FILL_ID, "./resources/fill.png", "Fill Tool");
   Create_GUI_Tool_Sperator(toolspanel, toolindex);
   Create_GUI_Tools_Color(toolspanel, toolindex++);
   
@@ -434,6 +436,17 @@ void AccelerPaint::ThresholdLayer(wxCommandEvent& event)
 
   opencl_img->Threshold(index);
   opencl_img->Refresh();
+}
+void AccelerPaint::ClickEvent(wxMouseEvent& event)
+{
+  AccelerPaint* obj = (AccelerPaint*)GetParent()->GetParent();
+  if(obj->LayerSelected() == -1)
+    return;
+  if(obj->selected_tool == FILL_ID)
+  {
+    obj->opencl_img->BucketFill(obj->LayerSelected(), event.GetX(), event.GetY(), obj->pickedcolor.Red(),
+                           obj->pickedcolor.Green(), obj->pickedcolor.Blue());
+  }
 }
 void AccelerPaint::Toolsupdate(int tool)
 {

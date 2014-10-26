@@ -78,9 +78,13 @@ class AccelerPaint : public wxFrame
     void InvertLayer(wxCommandEvent& event);
     void BlurLayer(wxCommandEvent& event);
     void ThresholdLayer(wxCommandEvent& event);
+    void ClickEvent(wxMouseEvent& event);
 
     void Toolsupdate(int tool);
     int LayerSelected();
+
+    
+    void BucketFill(wxMouseEvent& event);
 
     wxPanel* layerframe;
     wxPanel* toolspanel;
@@ -100,6 +104,7 @@ class AccelerPaint : public wxFrame
     
     unsigned seperators;
     unsigned selected_tool;
+    static unsigned FILL_ID;
     
     static const long ID_OpenItem;
     static const long ID_OpenLItem;

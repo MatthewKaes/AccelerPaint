@@ -76,7 +76,6 @@ void Accel_ImagePanel::Update(wxPaintEvent& event)
   if(ImagePanel)
   {
     int rend_width, rend_height;
-    int x_off, y_off;
 
     //Update scroll width
     if(img_width < parent_->GetSize().GetWidth() - scroll_size)
@@ -260,6 +259,20 @@ void Accel_ImagePanel::Threshold(unsigned layer)
 {
   device.Treshold(ImageData(layer));
 
+  Refresh();
+}
+void Accel_ImagePanel::BucketFill(int layer, unsigned x, unsigned y, unsigned r, unsigned g, unsigned b)
+{
+  x += x_off;
+  y += y_off;
+  for(int i = -3; i <= 3; i++)
+  {
+    for(int j = -3; j <= 3; j++)
+    {
+      Layers[layer].Image->SetRGB(x + i, y + j, r, g, b);
+      Layers[layer].Image->SetAlpha(x + i, y + j, 255);
+    }
+  }
   Refresh();
 }
 void Accel_ImagePanel::CheckVisability(int index, bool state)

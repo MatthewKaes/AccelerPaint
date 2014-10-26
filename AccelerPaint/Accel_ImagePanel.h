@@ -31,6 +31,9 @@ public:
   void Invert(unsigned layer);
   void Blur(unsigned layer);
   void Threshold(unsigned layer);
+  
+  //Operations
+  void BucketFill(int layer, unsigned x, unsigned y, unsigned r, unsigned g, unsigned b);
 
   //Setters
   void CheckVisability(int index, bool state);
@@ -48,6 +51,8 @@ public:
   std::vector<Layer>* GetLayers();
   void Empty();
 
+  wxPanel* ImagePanel;
+
 private:
   enum Repaint_States { NO_REPAINT, FULL_REPAINT };
   
@@ -56,6 +61,7 @@ private:
   int id;
   long draw_id;
   int img_width, img_height;
+  int x_off, y_off;
   int scroll_size;
   wxImage Render;
   wxWindow* parent_;
@@ -63,7 +69,6 @@ private:
   wxScrollBar* vscroll_;
   wxImage Background;
   std::vector<Layer> Layers;
-  wxPanel* ImagePanel;
   OpenCL_Dev device;
   Repaint_States need_paint;
 };
