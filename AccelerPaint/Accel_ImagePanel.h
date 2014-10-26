@@ -30,6 +30,7 @@ public:
   //Filters
   void Invert(unsigned layer);
   void Blur(unsigned layer);
+  void Threshold(unsigned layer);
 
   //Setters
   void CheckVisability(int index, bool state);

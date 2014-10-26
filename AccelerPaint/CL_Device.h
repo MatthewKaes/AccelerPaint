@@ -47,6 +47,7 @@ public:
   bool Fill(image img_data, rect fill_region, color fill_color);
   bool Blend(image img_base, image img_forground);
   bool Invert(image img_base);
+  bool Treshold(image img_base);
   bool Blur(image img_base);
 
 private:

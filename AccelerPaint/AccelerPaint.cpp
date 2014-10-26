@@ -97,6 +97,9 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
   int ID_Blur = wxNewId();
   menu_items = new wxMenuItem(filemenu, ID_Blur, _("&Blur"), wxEmptyString, wxITEM_NORMAL);
   filemenu->Append(menu_items);
+  int ID_Threshold = wxNewId();
+  menu_items = new wxMenuItem(filemenu, ID_Threshold, _("&Treshold"), wxEmptyString, wxITEM_NORMAL);
+  filemenu->Append(menu_items);
   menustrip->Append(filemenu, _("F&ilter"));
   
   //Set the Menu bar
@@ -110,6 +113,7 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
   //Filters
   Connect(ID_Invert, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::InvertLayer);
   Connect(ID_Blur, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::BlurLayer);
+  Connect(ID_Threshold, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::ThresholdLayer);
 
 
 }
@@ -420,6 +424,15 @@ void AccelerPaint::BlurLayer(wxCommandEvent& event)
     return;
 
   opencl_img->Blur(index);
+  opencl_img->Refresh();
+}
+void AccelerPaint::ThresholdLayer(wxCommandEvent& event)
+{
+  int index = LayerSelected();
+  if(index == wxNOT_FOUND)
+    return;
+
+  opencl_img->Threshold(index);
   opencl_img->Refresh();
 }
 void AccelerPaint::Toolsupdate(int tool)

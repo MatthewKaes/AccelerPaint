@@ -256,6 +256,12 @@ void Accel_ImagePanel::Blur(unsigned layer)
 
   Refresh();
 }
+void Accel_ImagePanel::Threshold(unsigned layer)
+{
+  device.Treshold(ImageData(layer));
+
+  Refresh();
+}
 void Accel_ImagePanel::CheckVisability(int index, bool state)
 {
   Layers[index].Enabled = state;

@@ -61,5 +61,8 @@
     <None Include="shaders\Inverter.cl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\Threshold.cl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
