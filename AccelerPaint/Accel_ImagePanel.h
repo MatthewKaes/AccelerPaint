@@ -7,11 +7,19 @@
 
 #include <vector>
 
+#define FILL_TOLERANCE 12
+
 struct Layer
 {
   wxImage* Image;
   bool Enabled;
   float Opacity;
+};
+struct Pixel
+{
+  Pixel(int x_, int y_) : x(x_), y(y_){}
+  int x;
+  int y;
 };
 
 class Accel_ImagePanel : public wxFrame {

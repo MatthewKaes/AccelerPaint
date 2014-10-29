@@ -1,6 +1,7 @@
 #include "Accel_ImagePanel.h"
 #include "wx\window.h"
 #include "wx\dcbuffer.h"
+#include <stack>
 
 Accel_ImagePanel::Accel_ImagePanel(wxWindow* parent, wxScrollBar* hscroll, wxScrollBar* vscroll)
 {
@@ -263,14 +264,38 @@ void Accel_ImagePanel::Threshold(unsigned layer)
 }
 void Accel_ImagePanel::BucketFill(int layer, unsigned x, unsigned y, unsigned r, unsigned g, unsigned b)
 {
+  if(!Layers[layer].Enabled)
+    return;
   x += x_off;
   y += y_off;
-  for(int i = -3; i <= 3; i++)
+  wxImage* img = Layers[layer].Image;
+  std::stack<Pixel> pixels;
+  pixels.push(Pixel(x , y));
+
+  int red = img->GetRed(x, y);
+  int blue = img->GetBlue(x, y);
+  int green = img->GetGreen(x, y);
+  int alpha = img->GetAlpha(x, y);
+  
+  while(!pixels.empty())
   {
-    for(int j = -3; j <= 3; j++)
+    int px = pixels.top().x;
+    int py = pixels.top().y;
+    pixels.pop();
+    int diffrence = abs(img->GetRed(px, py) - red);
+    diffrence = abs(img->GetBlue(px, py) - blue);
+    diffrence = abs(img->GetGreen(px, py) - green);
+    diffrence = abs(img->GetAlpha(px, py) - alpha);
+    if(diffrence > FILL_TOLERANCE)
+      continue;
+    Layers[layer].Image->SetRGB(px, py, r, g, b);
+    Layers[layer].Image->SetAlpha(px, py, 255);
+    for(int i = -1; i <= 1; i += 2)
     {
-      Layers[layer].Image->SetRGB(x + i, y + j, r, g, b);
-      Layers[layer].Image->SetAlpha(x + i, y + j, 255);
+      for(int j = -1; j <= 1; j += 2)
+      {
+        pixels.push(Pixel(px + i, py + j));
+      }
     }
   }
   Refresh();
