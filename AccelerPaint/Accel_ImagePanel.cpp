@@ -272,6 +272,8 @@ void Accel_ImagePanel::BucketFill(int layer, unsigned x, unsigned y, unsigned r,
   std::stack<Pixel> pixels;
   pixels.push(Pixel(x , y));
 
+  bool* mem_map = new bool[img_height * img_width]();
+
   int red = img->GetRed(x, y);
   int blue = img->GetBlue(x, y);
   int green = img->GetGreen(x, y);
@@ -283,21 +285,27 @@ void Accel_ImagePanel::BucketFill(int layer, unsigned x, unsigned y, unsigned r,
     int py = pixels.top().y;
     pixels.pop();
     int diffrence = abs(img->GetRed(px, py) - red);
-    diffrence = abs(img->GetBlue(px, py) - blue);
-    diffrence = abs(img->GetGreen(px, py) - green);
-    diffrence = abs(img->GetAlpha(px, py) - alpha);
-    if(diffrence > FILL_TOLERANCE)
+    diffrence += abs(img->GetBlue(px, py) - blue);
+    diffrence += abs(img->GetGreen(px, py) - green);
+    diffrence += abs(img->GetAlpha(px, py) - alpha);
+    if(diffrence > FILL_TOLERANCE || mem_map[py * img_width + px])
       continue;
     Layers[layer].Image->SetRGB(px, py, r, g, b);
     Layers[layer].Image->SetAlpha(px, py, 255);
-    for(int i = -1; i <= 1; i += 2)
+    for(int i = -1; i <= 1; i++)
     {
-      for(int j = -1; j <= 1; j += 2)
+      for(int j = -1; j <= 1; j++)
       {
-        pixels.push(Pixel(px + i, py + j));
+        if(px + i < img_width && px + i >= 0 &&
+           py + j < img_height && py + j >= 0 && !mem_map[(py + j) * img_width + (px + i)])
+        {
+          mem_map[py * img_width + px] = true;
+          pixels.push(Pixel(px + i, py + j));
+        }
       }
     }
   }
+  delete[] mem_map;
   Refresh();
 }
 void Accel_ImagePanel::CheckVisability(int index, bool state)

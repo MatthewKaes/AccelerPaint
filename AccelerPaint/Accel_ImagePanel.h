@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#define FILL_TOLERANCE 12
+#define FILL_TOLERANCE 18
 
 struct Layer
 {
