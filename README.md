@@ -10,7 +10,7 @@ Current Interface
 Rendering
 =========
 
-AccelerPaint currently only allows for blending (Alpha Blending) when rendering. This produces an output image the same as the one viewed in the viewport. Rendering is also OpenCL acclerated to maximize the speed of producing the final image.
+AccelerPaint currently only allows for blending (Alpha Blending) when rendering. This produces an output image the same as the one viewed in the viewport. Rendering is also OpenCL accelerated to maximize the speed of producing the final image.
 
 Layer 0:
 
