@@ -49,6 +49,7 @@ public:
   bool Invert(image img_base);
   bool Treshold(image img_base);
   bool Blur(image img_base);
+  bool Sobel(image img_base);
 
 private:
   cl::NDRange Work_Group(image& img_data);

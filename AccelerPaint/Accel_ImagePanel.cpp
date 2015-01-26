@@ -256,6 +256,12 @@ void Accel_ImagePanel::Blur(unsigned layer)
 
   Refresh();
 }
+void Accel_ImagePanel::Sobel(unsigned layer)
+{
+  device.Sobel(ImageData(layer));
+
+  Refresh();
+}
 void Accel_ImagePanel::Threshold(unsigned layer)
 {
   device.Treshold(ImageData(layer));

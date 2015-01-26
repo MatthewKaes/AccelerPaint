@@ -38,6 +38,7 @@ public:
   //Filters
   void Invert(unsigned layer);
   void Blur(unsigned layer);
+  void Sobel(unsigned layer);
   void Threshold(unsigned layer);
   
   //Operations

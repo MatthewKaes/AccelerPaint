@@ -64,5 +64,8 @@
     <None Include="shaders\Threshold.cl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\Sobel.cl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

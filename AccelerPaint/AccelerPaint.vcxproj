@@ -98,6 +98,7 @@
     <None Include="shaders\Fill.cl" />
     <None Include="shaders\Inverter.cl" />
     <None Include="shaders\Opacity.cl" />
+    <None Include="shaders\Sobel.cl" />
     <None Include="shaders\Threshold.cl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

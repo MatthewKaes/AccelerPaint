@@ -78,6 +78,7 @@ class AccelerPaint : public wxFrame
     void OpacityChanged(wxSpinEvent& event);
     void InvertLayer(wxCommandEvent& event);
     void BlurLayer(wxCommandEvent& event);
+    void SobelLayer(wxCommandEvent& event);
     void ThresholdLayer(wxCommandEvent& event);
     void ClickEvent(wxMouseEvent& event);
 
