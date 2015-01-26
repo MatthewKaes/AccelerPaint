@@ -16,6 +16,7 @@
 #define OPENCL_TEST
 #endif
 
+AccelerPaint* aclapp;
 
 unsigned AccelerPaint::FILL_ID = 0;
 unsigned AccelerPaint::EYEDROP_ID = 0;
@@ -25,6 +26,7 @@ const long AccelerPaint::ID_SaveItem = wxNewId();
 const long AccelerPaint::ID_Layer = wxNewId();
 const long AccelerPaint::ID_HScroll = wxNewId();
 const long AccelerPaint::ID_VScroll = wxNewId();
+const long AccelerPaint::ID_ColorUpdate = wxNewId();
 
 BEGIN_EVENT_TABLE(AccelerPaint,wxFrame)
     //(*EventTable(IFXFrame)
@@ -43,6 +45,8 @@ AccelerPaint::AccelerPaint(wxWindow* parent,wxWindowID id)
 #ifdef _WINDOWS
   SetDoubleBuffered(true);
 #endif
+
+  aclapp = this;
 }
 
 void AccelerPaint::Create_GUI(wxWindow* parent, wxWindowID id)
@@ -220,6 +224,7 @@ void AccelerPaint::Create_GUI_Tools_Color(wxWindow* parent, unsigned toolindex)
   ColorButton->SetToolTip(new wxToolTip("Select Tool Color"));
   
   Connect(Button_event, wxEVT_BUTTON,(wxObjectEventFunction)&AccelerPaint::ColorPicker);
+  Connect(ID_ColorUpdate, wxEVT_BUTTON, (wxObjectEventFunction)&AccelerPaint::ColorSelected);
 }
 void AccelerPaint::ResizeWindow(wxSizeEvent& event)
 {
@@ -377,9 +382,6 @@ void AccelerPaint::ImageBackground(wxPaintEvent& event)
 
   //Increase the rectangle size by 2 and recenter
   dc.DrawRectangle( -1, -1, this->GetSize().GetWidth() + 2, this->GetSize().GetHeight() + 2);
-
-  
-  ColorButton->SetBackgroundColour(pickedcolor);
 }
 void AccelerPaint::ImageScroll(wxScrollEvent& event)
 {
@@ -394,6 +396,10 @@ void AccelerPaint::ImageScroll(wxScrollEvent& event)
     pickedcolor = dlg.GetColourData().GetColour();
     ColorButton->SetBackgroundColour(pickedcolor);
   }
+}
+void AccelerPaint::ColorSelected(wxCommandEvent& event)
+{
+  ColorButton->SetBackgroundColour(pickedcolor);
 }
 void AccelerPaint::ToolSelected(wxCommandEvent& event)
 {
@@ -446,21 +452,22 @@ void AccelerPaint::ThresholdLayer(wxCommandEvent& event)
 }
 void AccelerPaint::ClickEvent(wxMouseEvent& event)
 {
-  AccelerPaint* obj = (AccelerPaint*)GetParent()->GetParent();
-  if(obj->LayerSelected() == -1)
+  if(aclapp->LayerSelected() == -1)
     return;
 
-  if(obj->selected_tool == FILL_ID)
+  if(aclapp->selected_tool == FILL_ID)
   {
-    obj->opencl_img->BucketFill(obj->LayerSelected(), event.GetX(), event.GetY(), obj->pickedcolor.Red(),
-                           obj->pickedcolor.Green(), obj->pickedcolor.Blue());
+    aclapp->opencl_img->BucketFill(aclapp->LayerSelected(), event.GetX(), event.GetY(), aclapp->pickedcolor.Red(),
+                           aclapp->pickedcolor.Green(), aclapp->pickedcolor.Blue());
   }
-  else if(obj->selected_tool == EYEDROP_ID)
+  else if(aclapp->selected_tool == EYEDROP_ID)
   {
     int x = event.GetX();
     int y = event.GetY();
-    Layer s = obj->opencl_img->GetLayers()->at(obj->LayerSelected());
-    obj->pickedcolor.Set(s.Image->GetRed(x, y), s.Image->GetGreen(x, y), s.Image->GetBlue(x, y));
+    Layer s = aclapp->opencl_img->GetLayers()->at(aclapp->LayerSelected());
+    aclapp->pickedcolor.Set(s.Image->GetRed(x, y), s.Image->GetGreen(x, y), s.Image->GetBlue(x, y));
+
+    wxPostEvent(aclapp, wxCommandEvent(wxEVT_BUTTON, aclapp->ID_ColorUpdate));
   }
 }
 void AccelerPaint::Toolsupdate(int tool)

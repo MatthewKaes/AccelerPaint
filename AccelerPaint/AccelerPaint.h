@@ -73,6 +73,7 @@ class AccelerPaint : public wxFrame
     void ImageBackground(wxPaintEvent& event);
     void ImageScroll(wxScrollEvent& event);
     void ColorPicker(wxCommandEvent& event);
+    void ColorSelected(wxCommandEvent& event);
     void ToolSelected(wxCommandEvent& event);
     void OpacityChanged(wxSpinEvent& event);
     void InvertLayer(wxCommandEvent& event);
@@ -106,7 +107,9 @@ class AccelerPaint : public wxFrame
     unsigned selected_tool;
     static unsigned FILL_ID;
     static unsigned EYEDROP_ID;
-    
+
+    //Event ids
+    static const long ID_ColorUpdate;
     static const long ID_OpenItem;
     static const long ID_OpenLItem;
     static const long ID_SaveItem;
