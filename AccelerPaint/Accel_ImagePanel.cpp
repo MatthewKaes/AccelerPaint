@@ -60,7 +60,7 @@ void Accel_ImagePanel::RenderImage()
 
   image next_img;
   next_img.pos_data = img_final.pos_data;
-  for(unsigned layer = 0; layer < LayerCount(); layer++)
+  for(int layer = LayerCount() - 1; layer >= 0; layer--)
   {
     if(GetVisability(layer))
     {
@@ -164,15 +164,15 @@ void Accel_ImagePanel::LoadFile(const wxString& name, bool new_layer)
     new_lay.Image = new wxImage();
     new_lay.Enabled = true;
     new_lay.Opacity = 1.0f;
-    Layers.push_back(new_lay);
+    Layers.insert(Layers.begin(), new_lay);
   }
-  Layers[Layers.size() - 1].Enabled = true;
-  Layers[Layers.size() - 1].Image->LoadFile(name);
+  Layers[0].Enabled = true;
+  Layers[0].Image->LoadFile(name);
 
   //Set alpha channels for images that don't have them.
-  if(!Layers[Layers.size() - 1].Image->GetAlpha())
+  if(!Layers[0].Image->GetAlpha())
   {
-    Layers[Layers.size() - 1].Image->InitAlpha();
+    Layers[0].Image->InitAlpha();
   }
   
   //If it's not a new layer then update the canvas size and position.
@@ -194,9 +194,9 @@ void Accel_ImagePanel::LoadFile(const wxString& name, bool new_layer)
   //Resize to the canvas if it is a new layer
   else
   {
-    if(Layers[Layers.size() - 1].Image->GetSize() != Layers[0].Image->GetSize())
+    if(Layers[0].Image->GetSize() != Layers[Layers.size() - 1].Image->GetSize())
     {
-      Layers[Layers.size() - 1].Image->Resize(Layers[0].Image->GetSize(), wxPoint(0, 0));
+      Layers[0].Image->Resize(Layers[Layers.size() - 1].Image->GetSize(), wxPoint(0, 0));
     }
   }
 }
@@ -225,7 +225,7 @@ void Accel_ImagePanel::LoadFile(int width, int height, unsigned char* data, unsi
   new_lay.Image = new wxImage(width, height, data, alpha);
   new_lay.Enabled = true;
   new_lay.Opacity = 1.0f;
-  Layers.push_back(new_lay);
+  Layers.insert(Layers.begin(), new_lay);
   
   //If it's not a new layer then update the canvas size and position.
   if(!new_layer)

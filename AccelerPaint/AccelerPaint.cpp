@@ -265,12 +265,12 @@ void AccelerPaint::OpenFile(wxCommandEvent& event)
         input_stream.ReadAll(data, datagram.i_height * datagram.i_width * COLOR_DEPTH);
         input_stream.ReadAll(alpha, datagram.i_height * datagram.i_width);
         opencl_img->LoadFile(datagram.i_width, datagram.i_height, data, alpha, layer != 0);
-        opencl_img->CheckVisability(layer, discriptor.visible);
-        opencl_img->SetOpacity(layer, discriptor.opacity);
+        opencl_img->CheckVisability(0, discriptor.visible);
+        opencl_img->SetOpacity(0, discriptor.opacity);
         
-        layersinfo->Insert(name, layersinfo->GetCount());
+        layersinfo->Insert(name, 0);
         if(discriptor.visible)
-          layersinfo->Check(layersinfo->GetCount() - 1);
+          layersinfo->Check(0);
       }
     }
     //load everything else
@@ -280,8 +280,8 @@ void AccelerPaint::OpenFile(wxCommandEvent& event)
       opencl_img->Refresh();
 
       layersinfo->Clear();
-      layersinfo->Insert(dlg.GetFilename(), layersinfo->GetCount());
-      layersinfo->Check(layersinfo->GetCount() - 1);
+      layersinfo->Insert(dlg.GetFilename(), 0);
+      layersinfo->Check(0);
     }
   }
 }
@@ -300,8 +300,8 @@ void AccelerPaint::OpenLayer(wxCommandEvent& event)
     opencl_img->LoadFile(dlg.GetPath(), true);
     opencl_img->Refresh();
     
-    layersinfo->Insert(dlg.GetFilename(), layersinfo->GetCount());
-    layersinfo->Check(layersinfo->GetCount() - 1);
+    layersinfo->Insert(dlg.GetFilename(), 0);
+    layersinfo->Check(0);
   }
 }
 void AccelerPaint::SaveRender(wxCommandEvent& event)
@@ -332,7 +332,8 @@ void AccelerPaint::SaveRender(wxCommandEvent& event)
       datagram.signature = ACCELER_SIGNITURE;
       datagram.version = ACCELER_VERSION;
       output_stream.WriteAll(&datagram, sizeof(datagram));
-      for(unsigned layer = 0; layer < opencl_img->LayerCount(); layer++)
+
+      for(int layer = opencl_img->LayerCount() - 1; layer >= 0; layer--)
       {
         Layer_Data discriptor;
         discriptor.opacity = opencl_img->GetOpacity(layer);
