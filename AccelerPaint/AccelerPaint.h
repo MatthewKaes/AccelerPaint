@@ -105,6 +105,7 @@ class AccelerPaint : public wxFrame
     unsigned seperators;
     unsigned selected_tool;
     static unsigned FILL_ID;
+    static unsigned EYEDROP_ID;
     
     static const long ID_OpenItem;
     static const long ID_OpenLItem;

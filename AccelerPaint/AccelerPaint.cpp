@@ -18,6 +18,7 @@
 
 
 unsigned AccelerPaint::FILL_ID = 0;
+unsigned AccelerPaint::EYEDROP_ID = 0;
 const long AccelerPaint::ID_OpenItem = wxNewId();
 const long AccelerPaint::ID_OpenLItem = wxNewId();
 const long AccelerPaint::ID_SaveItem = wxNewId();
@@ -170,6 +171,8 @@ void AccelerPaint::Create_GUI_Tools(wxWindow* parent, wxWindowID id)
   seperators = 0;
   Create_GUI_Tool_Generic(toolspanel, toolindex++, "./resources/arrow.png", "Move Tool");
   Create_GUI_Tool_Generic(toolspanel, toolindex++, "./resources/select.png", "Selection Tool");
+  EYEDROP_ID = toolindex++;
+  Create_GUI_Tool_Generic(toolspanel, EYEDROP_ID, "./resources/eyedropper.png", "Eyedropper Tool");
   Create_GUI_Tool_Sperator(toolspanel, toolindex);
   Create_GUI_Tool_Generic(toolspanel, toolindex++, "./resources/brush.png", "Brush Tool");
   FILL_ID = toolindex++;
@@ -374,6 +377,9 @@ void AccelerPaint::ImageBackground(wxPaintEvent& event)
 
   //Increase the rectangle size by 2 and recenter
   dc.DrawRectangle( -1, -1, this->GetSize().GetWidth() + 2, this->GetSize().GetHeight() + 2);
+
+  
+  ColorButton->SetBackgroundColour(pickedcolor);
 }
 void AccelerPaint::ImageScroll(wxScrollEvent& event)
 {
@@ -443,10 +449,18 @@ void AccelerPaint::ClickEvent(wxMouseEvent& event)
   AccelerPaint* obj = (AccelerPaint*)GetParent()->GetParent();
   if(obj->LayerSelected() == -1)
     return;
+
   if(obj->selected_tool == FILL_ID)
   {
     obj->opencl_img->BucketFill(obj->LayerSelected(), event.GetX(), event.GetY(), obj->pickedcolor.Red(),
                            obj->pickedcolor.Green(), obj->pickedcolor.Blue());
+  }
+  else if(obj->selected_tool == EYEDROP_ID)
+  {
+    int x = event.GetX();
+    int y = event.GetY();
+    Layer s = obj->opencl_img->GetLayers()->at(obj->LayerSelected());
+    obj->pickedcolor.Set(s.Image->GetRed(x, y), s.Image->GetGreen(x, y), s.Image->GetBlue(x, y));
   }
 }
 void AccelerPaint::Toolsupdate(int tool)
