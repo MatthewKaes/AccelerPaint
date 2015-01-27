@@ -198,7 +198,7 @@ void Accel_ImagePanel::LoadFile(const wxString& name, bool new_layer)
     }
   }
 }
-void Accel_ImagePanel::LoadFile(int width, int height, unsigned char* data, unsigned char* alpha, bool new_layer)
+void Accel_ImagePanel::LoadFile(int width, int height, unsigned char* data, unsigned char* alpha, channel channels, bool new_layer)
 {  
   //Update Fix:
   //quites iCCP warning for PNG files. Temporary fix that quites ALL warnings.
@@ -223,6 +223,7 @@ void Accel_ImagePanel::LoadFile(int width, int height, unsigned char* data, unsi
   new_lay.Image = new wxImage(width, height, data, alpha);
   new_lay.Enabled = true;
   new_lay.Opacity = 1.0f;
+  new_lay.Channels = channels;
   Layers.insert(Layers.begin(), new_lay);
   
   //If it's not a new layer then update the canvas size and position.
