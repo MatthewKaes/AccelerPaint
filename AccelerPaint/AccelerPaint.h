@@ -78,11 +78,17 @@ class AccelerPaint : public wxFrame
     void ColorSelected(wxCommandEvent& event);
     void ToolSelected(wxCommandEvent& event);
     void OpacityChanged(wxSpinEvent& event);
+    void ClickEvent(wxMouseEvent& event);
+
+    void RedChannel(wxCommandEvent& event);
+    void GreenChannel(wxCommandEvent& event);
+    void BlueChannel(wxCommandEvent& event);
+
     void InvertLayer(wxCommandEvent& event);
     void BlurLayer(wxCommandEvent& event);
     void SobelLayer(wxCommandEvent& event);
     void ThresholdLayer(wxCommandEvent& event);
-    void ClickEvent(wxMouseEvent& event);
+
 
     void Toolsupdate(int tool);
     int LayerSelected();

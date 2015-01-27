@@ -14,6 +14,15 @@
 
 
 //Structs used to talk to the GPU
+typedef struct channel
+{
+public:
+  channel() : Red(true), Green(true), Blue(true) {};
+  bool Red;
+  bool Green;
+  bool Blue;
+} channel;
+
 class color
 {
 public:
@@ -49,7 +58,7 @@ public:
   void Init();
   void Build_Kernel(const char* name);
   bool Fill(image img_data, rect fill_region, color fill_color);
-  bool Blend(image img_base, image img_forground);
+  bool Blend(image img_base, image img_forground, channel* chan_data);
   bool Invert(image img_base);
   bool Treshold(image img_base);
   bool Blur(image img_base);

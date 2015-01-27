@@ -9,22 +9,12 @@
 
 #define FILL_TOLERANCE 18
 
-
-class Channel
-{
-public:
-  Channel() : Red(true), Green(true), Blue(true) {};
-  bool Red;
-  bool Green;
-  bool Blue;
-};
-
 struct Layer
 {
   wxImage* Image;
   bool Enabled;
   float Opacity;
-  Channel Channels;
+  channel Channels;
 };
 struct Pixel
 {

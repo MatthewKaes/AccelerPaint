@@ -155,7 +155,7 @@ bool OpenCL_Dev::Fill(image img_data, rect fill_region, color fill_color)
 
   return true;
 }
-bool OpenCL_Dev::Blend(image img_base, image img_forground)
+bool OpenCL_Dev::Blend(image img_base, image img_forground, channel* chan_data)
 {
   if(!opencl_enabled)
     return false;
@@ -181,6 +181,11 @@ bool OpenCL_Dev::Blend(image img_base, image img_forground)
   queue_.enqueueWriteBuffer(Alpha_Chan2, CL_FALSE, 0, pixel_count, img_forground.alpha_data, NULL, &new_event);
   Events.push_back(new_event);
 
+  //Channel Data
+  cl::Buffer Channel_Data  = cl::Buffer(context_, CL_MEM_READ_ONLY, sizeof(chan_data));
+  queue_.enqueueWriteBuffer(Channel_Data, CL_FALSE, 0, sizeof(chan_data), chan_data, NULL, &new_event);
+  Events.push_back(new_event);
+
   //Number of threads to run.
   cl::NDRange global(img_base.pos_data.width, img_forground.pos_data.height);
 
@@ -193,6 +198,7 @@ bool OpenCL_Dev::Blend(image img_base, image img_forground)
   kern->setArg(1, img_forground.pos_data.width);
   kern->setArg(2, img_forground.opacity);
 
+
   //enqueue the Range to run the kernal, also wait for our write buffers to 
   //be enqueued if they aren't done yet
   queue_.enqueueNDRangeKernel(*kern, cl::NullRange, global, local, &Events);
@@ -203,7 +209,8 @@ bool OpenCL_Dev::Blend(image img_base, image img_forground)
   kern->setArg(1, Alpha_Chan);
   kern->setArg(2, img_base.pos_data.width);
   kern->setArg(3, RGB_Chan2);
-  kern->setArg(4, Alpha_Chan2);
+  kern->setArg(4, Alpha_Chan2);  
+  kern->setArg(5, Channel_Data);
 
   //enqueue the Range to run the kernal, also wait for our write buffers to 
   //be enqueued if they aren't done yet

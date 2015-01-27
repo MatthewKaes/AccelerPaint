@@ -98,11 +98,14 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
   //Construct Image Menu
   filemenu = new wxMenu();
   wxMenu* submenu = new wxMenu();
-  redchannel = new wxMenuItem(filemenu, wxNewId(), _("&Red"), wxEmptyString, true);
+  int ID_RedChen = wxNewId();
+  redchannel = new wxMenuItem(filemenu, ID_RedChen, _("&Red"), wxEmptyString, true);
   submenu->Append(redchannel);
-  greenchannel = new wxMenuItem(filemenu, wxNewId(), _("&Green"), wxEmptyString, true);
+  int ID_GreenChen = wxNewId();
+  greenchannel = new wxMenuItem(filemenu, ID_GreenChen, _("&Green"), wxEmptyString, true);
   submenu->Append(greenchannel);
-  bluechannel = new wxMenuItem(filemenu, wxNewId(), _("&Blue"), wxEmptyString, true);
+  int ID_BlueChen = wxNewId();
+  bluechannel = new wxMenuItem(filemenu, ID_BlueChen, _("&Blue"), wxEmptyString, true);
   submenu->Append(bluechannel);
   filemenu->Append(wxNewId(), _("&Channels"), submenu, wxEmptyString);
   menustrip->Append(filemenu, _("&Image"));
@@ -130,6 +133,11 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
   Connect(ID_OpenItem, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::OpenFile);
   Connect(ID_OpenLItem, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::OpenLayer);
   Connect(ID_SaveItem, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::SaveRender);
+  
+  //Channels
+  Connect(ID_RedChen, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::RedChannel);
+  Connect(ID_GreenChen, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::GreenChannel);
+  Connect(ID_BlueChen, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::BlueChannel);
 
   //Filters
   Connect(ID_Invert, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::InvertLayer);
@@ -446,6 +454,33 @@ void AccelerPaint::OpacityChanged(wxSpinEvent& event)
   float opacity = event.GetInt() / 100.0f;
 
   opencl_img->SetOpacity(index, opacity);
+  opencl_img->Refresh();
+}
+void AccelerPaint::RedChannel(wxCommandEvent& event)
+{
+  int index = LayerSelected();
+  if(index == wxNOT_FOUND)
+    return;
+
+  opencl_img->GetLayers()->at(index).Channels.Red = redchannel->IsChecked();
+  opencl_img->Refresh();
+}
+void AccelerPaint::GreenChannel(wxCommandEvent& event)
+{
+  int index = LayerSelected();
+  if(index == wxNOT_FOUND)
+    return;
+
+  opencl_img->GetLayers()->at(index).Channels.Green = greenchannel->IsChecked();
+  opencl_img->Refresh();
+}
+void AccelerPaint::BlueChannel(wxCommandEvent& event)
+{
+  int index = LayerSelected();
+  if(index == wxNOT_FOUND)
+    return;
+
+  opencl_img->GetLayers()->at(index).Channels.Blue = bluechannel->IsChecked();
   opencl_img->Refresh();
 }
 void AccelerPaint::InvertLayer(wxCommandEvent& event)
