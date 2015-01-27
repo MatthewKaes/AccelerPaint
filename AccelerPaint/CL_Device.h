@@ -14,21 +14,25 @@
 
 
 //Structs used to talk to the GPU
-typedef struct color
+class color
 {
+public:
+  color() : Red(0), Green(0), Blue(0), Alpha(0) {};
+
   unsigned char Red;
 	unsigned char Green;
 	unsigned char Blue;
 	unsigned char Alpha;
-} color;
+};
 
-typedef struct rect
+class rect
 {
+public:
   unsigned x;
 	unsigned y;
 	unsigned width;
 	unsigned height;
-} rect;
+};
 
 typedef struct image
 {

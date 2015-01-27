@@ -64,6 +64,8 @@ class AccelerPaint : public wxFrame
     void Create_GUI_Tools_Color(wxWindow* parent, unsigned toolindex);
     void Create_GUI_Tool_Generic(wxWindow* parent, unsigned toolindex, const char* img_path, const char* tooltip);
     void Create_GUI_Tool_Sperator(wxWindow* parent, unsigned toolindex);
+
+    // Events
     void ResizeWindow(wxSizeEvent& event);
     void OpenFile(wxCommandEvent& event);
     void OpenLayer(wxCommandEvent& event);
@@ -98,6 +100,11 @@ class AccelerPaint : public wxFrame
     wxMenu* filemenu;
     wxCheckListBox* layersinfo;
     wxButton *ColorButton;
+    
+    //Channels
+    wxMenuItem* redchannel;
+    wxMenuItem* greenchannel;
+    wxMenuItem* bluechannel;
 
     std::vector<wxBitmapButton*> toolbuttons;
 

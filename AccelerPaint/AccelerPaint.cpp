@@ -95,6 +95,18 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
   filemenu->Append(menu_items);
   menustrip->Append(filemenu, _("&Edit"));
   
+  //Construct Image Menu
+  filemenu = new wxMenu();
+  wxMenu* submenu = new wxMenu();
+  redchannel = new wxMenuItem(filemenu, wxNewId(), _("&Red"), wxEmptyString, true);
+  submenu->Append(redchannel);
+  greenchannel = new wxMenuItem(filemenu, wxNewId(), _("&Green"), wxEmptyString, true);
+  submenu->Append(greenchannel);
+  bluechannel = new wxMenuItem(filemenu, wxNewId(), _("&Blue"), wxEmptyString, true);
+  submenu->Append(bluechannel);
+  filemenu->Append(wxNewId(), _("&Channels"), submenu, wxEmptyString);
+  menustrip->Append(filemenu, _("&Image"));
+
   //Construct Filter Menu
   filemenu = new wxMenu();
   int ID_Invert = wxNewId();
@@ -375,6 +387,15 @@ void AccelerPaint::LayerChecked(wxCommandEvent& event)
 }
 void AccelerPaint::LayerChanged(wxCommandEvent& event)
 {
+  // Get selected Layer
+  Layer selected = opencl_img->GetLayers()->at(event.GetInt());
+  
+  // Set Channels
+  redchannel->Check(selected.Channels.Red);
+  greenchannel->Check(selected.Channels.Green);
+  bluechannel->Check(selected.Channels.Blue);
+
+  // Set Opacity
   opacityctrl->SetValue(floor(opencl_img->GetOpacity(event.GetInt()) * 100 + 0.5));
 }
 void AccelerPaint::ImageBackground(wxPaintEvent& event)

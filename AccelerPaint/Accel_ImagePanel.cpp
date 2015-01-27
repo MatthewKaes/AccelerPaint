@@ -49,14 +49,12 @@ void Accel_ImagePanel::RenderImage()
   img_final.pos_data.width = Render.GetSize().GetWidth();
   img_final.pos_data.height = Render.GetSize().GetHeight();
     
-  color fill_c;
-  fill_c.Alpha = fill_c.Blue = fill_c.Green = fill_c.Red = 0;
   rect fill_r;
   fill_r.width = Render.GetSize().GetWidth();
   fill_r.height = Render.GetSize().GetHeight();
   fill_r.x = fill_r.y = 0;
 
-  device.Fill(img_final, fill_r, fill_c);
+  device.Fill(img_final, fill_r, color());
 
   image next_img;
   next_img.pos_data = img_final.pos_data;
