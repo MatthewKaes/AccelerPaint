@@ -81,6 +81,7 @@ class AccelerPaint : public wxFrame
     void ClickEvent(wxMouseEvent& event);
 
     void DuplicateLayer(wxCommandEvent& event);
+    void DeleteLayer(wxCommandEvent& event);
     void RedChannel(wxCommandEvent& event);
     void GreenChannel(wxCommandEvent& event);
     void BlueChannel(wxCommandEvent& event);

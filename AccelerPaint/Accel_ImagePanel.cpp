@@ -243,6 +243,14 @@ void Accel_ImagePanel::LoadFile(int width, int height, unsigned char* data, unsi
     Render = ImagePtr->Copy();
   }
 }
+void Accel_ImagePanel::Delete(unsigned layer)
+{
+  //Layers[layer].Image->Destroy();
+  //delete Layers[layer].Image;
+  Layers.erase(Layers.begin() + layer);
+
+  Refresh();
+}
 void Accel_ImagePanel::Invert(unsigned layer)
 {
   device.Invert(ImageData(layer));

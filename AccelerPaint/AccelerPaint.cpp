@@ -110,6 +110,8 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
   filemenu->Append(wxNewId(), _("&Channels"), submenu, wxEmptyString);
   int ID_Duplicate = wxNewId();
   filemenu->Append(new wxMenuItem(filemenu, ID_Duplicate, _("&Duplicate"), wxEmptyString, wxITEM_NORMAL));
+  int ID_Delete = wxNewId();
+  filemenu->Append(new wxMenuItem(filemenu, ID_Delete, _("&Delete"), wxEmptyString, wxITEM_NORMAL));
   menustrip->Append(filemenu, _("&Layer"));
 
   //Construct Filter Menu
@@ -136,6 +138,7 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
   Connect(ID_OpenLItem, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::OpenLayer);
   Connect(ID_SaveItem, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::SaveRender);
   Connect(ID_Duplicate, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::DuplicateLayer);
+  Connect(ID_Delete, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::DeleteLayer);
   
   //Channels
   Connect(ID_RedChen, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::RedChannel);
@@ -562,6 +565,16 @@ void AccelerPaint::DuplicateLayer(wxCommandEvent& event)
   opencl_img->SetOpacity(0, selc.Opacity);
 
   opencl_img->Refresh();
+}
+void AccelerPaint::DeleteLayer(wxCommandEvent& event)
+{
+  
+  int index = LayerSelected();
+  if(index == wxNOT_FOUND || opencl_img->LayerCount() <= 1)
+    return;
+
+  opencl_img->Delete(index);
+  layersinfo->Delete(index);
 }
 void AccelerPaint::Toolsupdate(int tool)
 {
