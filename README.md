@@ -1,7 +1,7 @@
 AccelerPaint
 =============
 
-A simple open source image manipulation software with OpenCL acceleration. AccelerPaint can load basic image files (PNG, GIF, BMP, JPG). AccelerPaint currently supports layers, scrolling for large images and rendering out multilayered images to a single composite file. A simple interface is currently implemented for loading and managing files however manipulation features are not yet implemented.
+A simple open source image manipulation software with OpenCL acceleration. AccelerPaint can load basic image files (PNG, GIF, BMP, JPG). AccelerPaint currently supports layers, scrolling for large images and rendering out multilayered images to a single composite file. A simple interface is currently implemented for loading and managing files.
 
 Current Interface
 
@@ -10,7 +10,7 @@ Current Interface
 Rendering
 =========
 
-AccelerPaint currently only allows for blending (Alpha Blending) when rendering. This produces an output image the same as the one viewed in the viewport. Rendering is also OpenCL accelerated to maximize the speed of producing the final image.
+AccelerPaint currently allows for blending (Alpha Blending), channel toggling, and layer visability and opacity when rendering. This produces an output image the same as the one viewed in the viewport. Rendering is also OpenCL accelerated to maximize the speed of producing the final image.
 
 Layer 0:
 
