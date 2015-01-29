@@ -557,7 +557,7 @@ void AccelerPaint::DuplicateLayer(wxCommandEvent& event)
     return;
 
   Layer selc = opencl_img->GetLayers()->at(index);
-  opencl_img->LoadFile(selc.Image->GetWidth(), selc.Image->GetHeight(), selc.Image->GetData(), selc.Image->GetAlpha(), selc.Channels, true);
+  opencl_img->Duplicate(index);
   
   layersinfo->Insert(layersinfo->GetString(index), 0);
   layersinfo->Check(0);

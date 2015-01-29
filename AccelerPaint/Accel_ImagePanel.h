@@ -36,6 +36,7 @@ public:
   void LoadFile(const wxString& name, bool new_layer = false);
   void LoadFile(int width, int height, unsigned char* data, unsigned char* alpha, channel channels, bool new_layer = false);
   void Delete(unsigned layer);
+  void Duplicate(unsigned layer);
 
   //Filters
   void Invert(unsigned layer);

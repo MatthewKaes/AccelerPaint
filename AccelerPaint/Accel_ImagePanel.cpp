@@ -245,11 +245,28 @@ void Accel_ImagePanel::LoadFile(int width, int height, unsigned char* data, unsi
 }
 void Accel_ImagePanel::Delete(unsigned layer)
 {
-  //Layers[layer].Image->Destroy();
-  //delete Layers[layer].Image;
+  Layers[layer].Image->Destroy();
+  delete Layers[layer].Image;
   Layers.erase(Layers.begin() + layer);
 
   Refresh();
+}
+void Accel_ImagePanel::Duplicate(unsigned layer)
+{  
+  //Update Fix:
+  //quites iCCP warning for PNG files. Temporary fix that quites ALL warnings.
+  wxLogNull Nolog;
+
+  //Loading a file is going to require a repaint.
+  need_paint = FULL_REPAINT;
+
+  Layer new_lay;
+  new_lay.Image = new wxImage(Layers[layer].Image->Copy());
+  new_lay.Enabled = true;
+  new_lay.Opacity = 1.0f;
+  new_lay.Channels = Layers[layer].Channels;
+  Layers.insert(Layers.begin(), new_lay);
+
 }
 void Accel_ImagePanel::Invert(unsigned layer)
 {
