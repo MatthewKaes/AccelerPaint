@@ -108,7 +108,9 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
   bluechannel = new wxMenuItem(filemenu, ID_BlueChen, _("&Blue"), wxEmptyString, true);
   submenu->Append(bluechannel);
   filemenu->Append(wxNewId(), _("&Channels"), submenu, wxEmptyString);
-  menustrip->Append(filemenu, _("&Image"));
+  int ID_Duplicate = wxNewId();
+  filemenu->Append(new wxMenuItem(filemenu, ID_Duplicate, _("&Duplicate"), wxEmptyString, wxITEM_NORMAL));
+  menustrip->Append(filemenu, _("&Layer"));
 
   //Construct Filter Menu
   filemenu = new wxMenu();
@@ -133,6 +135,7 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
   Connect(ID_OpenItem, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::OpenFile);
   Connect(ID_OpenLItem, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::OpenLayer);
   Connect(ID_SaveItem, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::SaveRender);
+  Connect(ID_Duplicate, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::DuplicateLayer);
   
   //Channels
   Connect(ID_RedChen, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::RedChannel);
@@ -526,7 +529,7 @@ void AccelerPaint::ThresholdLayer(wxCommandEvent& event)
 }
 void AccelerPaint::ClickEvent(wxMouseEvent& event)
 {
-  if(aclapp->LayerSelected() == -1)
+  if(aclapp->LayerSelected() == wxNOT_FOUND)
     return;
 
   if(aclapp->selected_tool == FILL_ID)
@@ -543,6 +546,22 @@ void AccelerPaint::ClickEvent(wxMouseEvent& event)
 
     wxPostEvent(aclapp, wxCommandEvent(wxEVT_BUTTON, aclapp->ID_ColorUpdate));
   }
+}
+void AccelerPaint::DuplicateLayer(wxCommandEvent& event)
+{
+  int index = LayerSelected();
+  if(index == wxNOT_FOUND)
+    return;
+
+  Layer selc = opencl_img->GetLayers()->at(index);
+  opencl_img->LoadFile(selc.Image->GetWidth(), selc.Image->GetHeight(), selc.Image->GetData(), selc.Image->GetAlpha(), selc.Channels, true);
+  
+  layersinfo->Insert(layersinfo->GetString(index), 0);
+  layersinfo->Check(0);
+
+  opencl_img->SetOpacity(0, selc.Opacity);
+
+  opencl_img->Refresh();
 }
 void AccelerPaint::Toolsupdate(int tool)
 {

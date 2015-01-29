@@ -80,6 +80,7 @@ class AccelerPaint : public wxFrame
     void OpacityChanged(wxSpinEvent& event);
     void ClickEvent(wxMouseEvent& event);
 
+    void DuplicateLayer(wxCommandEvent& event);
     void RedChannel(wxCommandEvent& event);
     void GreenChannel(wxCommandEvent& event);
     void BlueChannel(wxCommandEvent& event);
