@@ -96,6 +96,7 @@
     <None Include="shaders\Blend.cl" />
     <None Include="shaders\Blur.cl" />
     <None Include="shaders\Fill.cl" />
+    <None Include="shaders\Greyscale.cl" />
     <None Include="shaders\Inverter.cl" />
     <None Include="shaders\Opacity.cl" />
     <None Include="shaders\Sobel.cl" />

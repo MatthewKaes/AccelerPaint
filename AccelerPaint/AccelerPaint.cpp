@@ -97,6 +97,7 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
   
   //Construct Image Menu
   filemenu = new wxMenu();
+
   wxMenu* submenu = new wxMenu();
   int ID_RedChen = wxNewId();
   redchannel = new wxMenuItem(filemenu, ID_RedChen, _("&Red"), wxEmptyString, true);
@@ -108,6 +109,13 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
   bluechannel = new wxMenuItem(filemenu, ID_BlueChen, _("&Blue"), wxEmptyString, true);
   submenu->Append(bluechannel);
   filemenu->Append(wxNewId(), _("&Channels"), submenu, wxEmptyString);
+
+  submenu = new wxMenu();
+  int ID_Greyscale = wxNewId();
+  menu_items = new wxMenuItem(filemenu, ID_Greyscale, _("&Grey Scale"), wxEmptyString, true);
+  submenu->Append(menu_items);
+  filemenu->Append(wxNewId(), _("C&onvert"), submenu, wxEmptyString);
+
   int ID_Duplicate = wxNewId();
   filemenu->Append(new wxMenuItem(filemenu, ID_Duplicate, _("&Duplicate"), wxEmptyString, wxITEM_NORMAL));
   int ID_Delete = wxNewId();
@@ -150,6 +158,7 @@ void AccelerPaint::Create_GUI_MenuStrip(wxWindow* parent, wxWindowID id)
   Connect(ID_Blur, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::BlurLayer);
   Connect(ID_Sobel, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::SobelLayer);
   Connect(ID_Threshold, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::ThresholdLayer);
+  Connect(ID_Greyscale, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&AccelerPaint::GreyscaleLayer);
 
 
 }
@@ -528,6 +537,15 @@ void AccelerPaint::ThresholdLayer(wxCommandEvent& event)
     return;
 
   opencl_img->Threshold(index);
+  opencl_img->Refresh();
+}
+void AccelerPaint::GreyscaleLayer(wxCommandEvent& event)
+{
+  int index = LayerSelected();
+  if(index == wxNOT_FOUND)
+    return;
+
+  opencl_img->Greyscale(index);
   opencl_img->Refresh();
 }
 void AccelerPaint::ClickEvent(wxMouseEvent& event)

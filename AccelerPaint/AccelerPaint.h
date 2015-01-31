@@ -90,6 +90,7 @@ class AccelerPaint : public wxFrame
     void BlurLayer(wxCommandEvent& event);
     void SobelLayer(wxCommandEvent& event);
     void ThresholdLayer(wxCommandEvent& event);
+    void GreyscaleLayer(wxCommandEvent& event);
 
 
     void Toolsupdate(int tool);

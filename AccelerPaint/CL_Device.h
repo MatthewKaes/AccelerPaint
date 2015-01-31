@@ -57,11 +57,10 @@ public:
   OpenCL_Dev();
   void Init();
   void Build_Kernel(const char* name);
+  bool Simple(image img_base, const char* filter);
+  bool Blur(image img_base);
   bool Fill(image img_data, rect fill_region, color fill_color);
   bool Blend(image img_base, image img_forground, channel* chan_data);
-  bool Invert(image img_base);
-  bool Treshold(image img_base);
-  bool Blur(image img_base);
   bool Sobel(image img_base);
 
 private:

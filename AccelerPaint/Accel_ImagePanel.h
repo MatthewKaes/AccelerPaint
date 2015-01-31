@@ -43,6 +43,7 @@ public:
   void Blur(unsigned layer);
   void Sobel(unsigned layer);
   void Threshold(unsigned layer);
+  void Greyscale(unsigned layer);
   
   //Operations
   void BucketFill(int layer, unsigned x, unsigned y, unsigned r, unsigned g, unsigned b);

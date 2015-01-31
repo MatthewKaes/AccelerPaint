@@ -270,7 +270,19 @@ void Accel_ImagePanel::Duplicate(unsigned layer)
 }
 void Accel_ImagePanel::Invert(unsigned layer)
 {
-  device.Invert(ImageData(layer));
+  device.Simple(ImageData(layer), "Inverter");
+
+  Refresh();
+}
+void Accel_ImagePanel::Threshold(unsigned layer)
+{
+  device.Simple(ImageData(layer), "Threshold");
+
+  Refresh();
+}
+void Accel_ImagePanel::Greyscale(unsigned layer)
+{
+  device.Simple(ImageData(layer), "Greyscale");
 
   Refresh();
 }
@@ -283,12 +295,6 @@ void Accel_ImagePanel::Blur(unsigned layer)
 void Accel_ImagePanel::Sobel(unsigned layer)
 {
   device.Sobel(ImageData(layer));
-
-  Refresh();
-}
-void Accel_ImagePanel::Threshold(unsigned layer)
-{
-  device.Treshold(ImageData(layer));
 
   Refresh();
 }
